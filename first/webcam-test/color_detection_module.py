@@ -3,12 +3,13 @@ import time
 import cv2
 import numpy as np
 from config import *
+# 코드 참조 : https://github.com/murtazahassan/Learn-OpenCV-in-3-hours
 def findColor(img, color, figure):
     """
     인자로 들어온 Color에 해당하는 도형이 있으면 도형을 포함하는 최소 사각형의 중심 좌표 반환
     :param img: 이미지 원본 (웹캠)
     :param color: Color enum
-    :return: 도형 중심 좌표 (x, y)와 점 개수
+    :return: contour 정보 (x, y, w, h)와 점 개수
     """
 
     # 이거는 BGR2HSV 사용해야 함.
@@ -24,7 +25,30 @@ def findColor(img, color, figure):
     # print(x, y)
     return contour_info, objType
 
+def find_qr(img, decoder):
+    """
+    이미지에서 qr 코드를 발견해서 읽음
+    :param img : 이미지 원본 (웹캠)
+    :param decoder : QRCodeDetector 객체
+    :return : qr 코드 감지 여부 반환
+    """
+    data, points, _ = decoder.detectAndDecode(img)
 
+    if len(data) !=0 and points is not None:
+        print('Decoded data: ' + data)
+        print(f'point : {points}')
+        return True
+
+        points = points[0]
+        for i in range(len(points)):
+            pt1 = [int(val) for val in points[i]]
+            pt2 = [int(val) for val in points[(i + 1) % 4]]
+            cv2.line(img, pt1, pt2, color=(255, 0, 0), thickness=3)
+
+        cv2.imshow('Detected QR code', img)
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
+    return False
 
 def getContours(img, mask, figure):
     """

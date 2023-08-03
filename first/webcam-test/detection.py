@@ -24,3 +24,14 @@ def detection_figure(webcam_cap, color, figure):
         if cv2.waitKey(1) & 0xFF == ord('q'):
             cv2.imwrite("hello.png", img)
             break
+def detection_qr(webcam_cap, decoder):
+    while True:
+        _, img = webcam_cap.read()
+        cv2.imshow("adgsgds", img)
+        success = find_qr(img, decoder)
+        if success:
+            break
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            cv2.imwrite("hello.png", img)
+            break
+        # find_qr(img)
