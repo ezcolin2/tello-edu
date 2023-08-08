@@ -1,9 +1,8 @@
-import time
-
 import cv2
 import numpy as np
 import pyzbar.pyzbar as pyzbar
 from config import *
+
 def find_color(img, color, figure):
     """
     인자로 들어온 Color에 해당하는 도형이 있으면 도형을 포함하는 최소 사각형의 중심 좌표 반환
@@ -80,12 +79,12 @@ def get_contours(img, mask, figure):
             # 점 위치
             approx = cv2.approxPolyDP(cnt, 0.02*peri, True)
             objType = len(approx)
-            if count[figure.value][0]<=objType <= count[figure.value][1]:
+            if count[figure.value][0] <= objType <= count[figure.value][1]:
                 print("ok")
                 x, y, w, h = cv2.boundingRect(approx)
                 figureTypeList.append(objType)
                 figureTypeArea.append((x, y, w, h))
-            if figure.value == Figure.TRI.value and objType==3:
+            if figure.value == Figure.TRI.value and objType == 3:
                 print('tri')
             # if figure.value==Figure.TRI.value:
             #     print('tri')

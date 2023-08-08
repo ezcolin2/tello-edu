@@ -1,5 +1,5 @@
-from config import *
 import numpy as np
+from config import *
 def track_figure(tello, contour_info, pid, p_error):
     """
     객체가 가운데에 올 수 있게끔 조절하는 함수.

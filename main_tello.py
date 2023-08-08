@@ -1,5 +1,5 @@
 
-from detection import *
+from web_cam_detection_module import *
 from djitellopy import Tello
 import time
 

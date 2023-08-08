@@ -1,5 +1,4 @@
 from enum import Enum
-import cv2
 cam_width = 640 # 웹캠 너비
 cam_height = 480 # 웹캠 높이
 detect_min = 100 # 색을 탐지하는 최소 면적
@@ -31,4 +30,3 @@ count = [
 fb_range = [20000, 24000]
 ud_range = [0.3 * cam_height, 0.7 * cam_height]
 pid = [0.1, 0.1, 0] # proportional, integrate, deriative
-
