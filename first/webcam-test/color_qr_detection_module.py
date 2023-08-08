@@ -4,7 +4,7 @@ import cv2
 import numpy as np
 from config import *
 # 코드 참조 : https://github.com/murtazahassan/Learn-OpenCV-in-3-hours
-def findColor(img, color, figure):
+def find_color(img, color, figure):
     """
     인자로 들어온 Color에 해당하는 도형이 있으면 도형을 포함하는 최소 사각형의 중심 좌표 반환
     :param img: 이미지 원본 (웹캠)
@@ -20,7 +20,7 @@ def findColor(img, color, figure):
     # print(lower, upper)
     mask = cv2.inRange(imgHSV, lower, upper)
     cv2.imshow("sdf", mask)
-    contour_info, objType = getContours(img, mask, figure)
+    contour_info, objType = get_contours(img, mask, figure)
     # print(is_center(x, y))
     # print(x, y)
     return contour_info, objType
@@ -50,7 +50,7 @@ def find_qr(img, decoder):
         # cv2.destroyAllWindows()
     return False
 
-def getContours(img, mask, figure):
+def get_contours(img, mask, figure):
     """
     mask로부터 contour를 얻어내서 img에 그린 후 도형의 중심 좌표 반환
     하나의 도형만 감지
@@ -109,3 +109,29 @@ def getContours(img, mask, figure):
         figure_type = figureTypeList[max_idx]
     return (x, y, w, h), figure_type
 
+def read_img(img):
+    """
+    이미지를 받아서 qr이 있다면 contour를 그리고 그 내용을 contour 위에 출력
+    :param img : 이미지
+    :return : (x, y, w, h, barcode), img
+    """
+    # 바코드 정보 decoding
+    barcodes = pyzbar.decode(img)
+    print(barcodes)
+    # 바코드 정보가 여러개 이기 때문에 하나씩 해석
+    arr=[] # 바코드 좌표 정보
+    for barcode in barcodes:
+        # 바코드 rect정보
+        x, y, w, h = barcode.rect
+        arr.append((x, y, w, h, barcode))
+        # 바코드 데이터 디코딩
+        barcode_info = barcode.data.decode('utf-8')
+        # print(barcode_info)
+        # 인식한 바코드 사각형 표시
+        cv2.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), 2)
+        # 인식한 바코드 사각형 위에 글자 삽입
+        cv2.putText(img, barcode_info, (x , y - 20), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 255), 1)
+    arr.sort(key = lambda x : x[2]*x[3])
+    if len(arr)==0: # 비어있다면
+        arr.append((-1, -1, -1, -1, None))
+    return arr[0], img
