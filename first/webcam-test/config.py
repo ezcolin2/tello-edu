@@ -26,3 +26,9 @@ count = [
     [3, 4], # 삼각형
     [7, 9]  # 원
 ]
+
+# PID 제어 관련 설정
+fb_range = [20000, 24000]
+ud_range = [0.3 * cam_height, 0.7 * cam_height]
+pid = [0.1, 0.1, 0] # proportional, integrate, deriative
+

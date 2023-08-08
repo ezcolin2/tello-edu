@@ -2,24 +2,25 @@ import time
 
 import cv2
 import numpy as np
+import pyzbar.pyzbar as pyzbar
 from config import *
-# 코드 참조 : https://github.com/murtazahassan/Learn-OpenCV-in-3-hours
 def find_color(img, color, figure):
     """
     인자로 들어온 Color에 해당하는 도형이 있으면 도형을 포함하는 최소 사각형의 중심 좌표 반환
-    :param img: 이미지 원본 (웹캠)
+    코드 참조 : https://github.com/murtazahassan/Learn-OpenCV-in-3-hours
+    :param img: 이미지 원본
     :param color: Color enum
     :return: contour 정보 (x, y, w, h)와 점 개수
     """
 
     # 이거는 BGR2HSV 사용해야 함.
-    # HSV로 변환하면 grayscale로 바꿔주고 채널이 하나
+    # HSV로 변환하면 grayscale로 바꿔주고 채널이 하나.
     imgHSV = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     lower = np.array([myColors[color.value][0:3]])
     upper = np.array([myColors[color.value][3:6]])
     # print(lower, upper)
     mask = cv2.inRange(imgHSV, lower, upper)
-    cv2.imshow("sdf", mask)
+    cv2.imshow("mask", mask)
     contour_info, objType = get_contours(img, mask, figure)
     # print(is_center(x, y))
     # print(x, y)
@@ -35,8 +36,8 @@ def find_qr(img, decoder):
     data, points, _ = decoder.detectAndDecode(img)
 
     if len(data) !=0 and points is not None:
-        print('Decoded data: ' + data)
-        print(f'point : {points}')
+        # print('Decoded data: ' + data)
+        # print(f'point : {points}')
         return True
 
         points = points[0]
@@ -71,7 +72,7 @@ def get_contours(img, mask, figure):
     for cnt in contours:
         area = cv2.contourArea(cnt)
         # minimum threshold를 정하면 noise를 줄일 수 있음
-        if area > 100: # area가 500보다 클 때만 contour 그리기
+        if area > 300: # area가 500보다 클 때만 contour 그리기
             cv2.drawContours(img, cnt, -1, (255, 0, 0), 3)
             # curve 길이 구하기
             peri = cv2.arcLength(cnt, True)
@@ -79,7 +80,7 @@ def get_contours(img, mask, figure):
             # 점 위치
             approx = cv2.approxPolyDP(cnt, 0.02*peri, True)
             objType = len(approx)
-            if objType == count[figure.value]:
+            if count[figure.value][0]<=objType <= count[figure.value][1]:
                 print("ok")
                 x, y, w, h = cv2.boundingRect(approx)
                 figureTypeList.append(objType)
@@ -88,7 +89,8 @@ def get_contours(img, mask, figure):
                 print('tri')
             # if figure.value==Figure.TRI.value:
             #     print('tri')
-            elif figure.value == Figure.CIRCLE.value and objType>=4:
+            elif count[figure.value][0]<=objType <= count[figure.value][1]:
+            # elif figure.value == Figure.CIRCLE.value and objType>=4:
                 print(f'circle : {objType}')
                 print('circle')
 
@@ -112,12 +114,12 @@ def get_contours(img, mask, figure):
 def read_img(img):
     """
     이미지를 받아서 qr이 있다면 contour를 그리고 그 내용을 contour 위에 출력
+    코드 참조 : https://github.com/hyunseokjoo/detecting_BarAndQR
     :param img : 이미지
     :return : (x, y, w, h, barcode), img
     """
     # 바코드 정보 decoding
     barcodes = pyzbar.decode(img)
-    print(barcodes)
     # 바코드 정보가 여러개 이기 때문에 하나씩 해석
     arr=[] # 바코드 좌표 정보
     for barcode in barcodes:
