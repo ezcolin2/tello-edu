@@ -1,5 +1,6 @@
 
-from web_cam_detection_module import *
+from module.tello_detection_module import *
+from module.config import *
 from djitellopy import Tello
 import time
 
@@ -26,48 +27,62 @@ tello.send_rc_control(0, 0, 0, 0)
 # 이륙
 tello.takeoff()
 time.sleep(2)
-# detection_figure(tello, Color.RED, Figure.TRI)
-"""
-    처음 빨간색 원을 감지할 때까지 회전하면서 올라온다.
-    빨간색 원을 감지한 횟수가 일정 횟수 이상이면 빨간색 원을 감지했다고 판단하고 움직임을 멈춘다.
-"""
 
-cnt = 0
-while cnt<4:
-    frame_read = tello.get_frame_read()
-    myFrame = frame_read.frame
-    img = cv2.resize(myFrame, (cam_width, cam_height))
-    cv2.imshow("asdf", img)
-    contour_info ,figureType = find_color(img, Color.RED, Figure.TRI)
-    print(contour_info, figureType)
-    x, y, w, h = contour_info
-    if cam_width*0.2 <= x+w//2 <= cam_width*0.8 and cam_height*0.2 <= y+h//2 <= cam_height*0.8 and figureType >=0 and w*h>5000:
-        cnt+=1
-        tello.send_rc_control(0,0,0,0)
-        break
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
-    tello.send_rc_control(0, 0, 20, 0)
-print("감지 ")
-cv2.destroyAllWindows()
-# tello.land()
-"""
-    Flag 1 미션 수행 
-"""
-
-tello_detection_figure(tello, Color.RED, Figure.TRI)
-cv2.destroyAllWindows()
-# 만약 qr을 잘 인식 못하면 아래로 조금 감
-# tello.move_down(10)
-# Flag 1 qr 코드 인식
-tello.send_rc_control(0, 0, 0, 0)
-
-# 아래로 조금 가서 qr 인식
-tello.move_down(30)
-tello_detection_qr(tello)
-cv2.destroyAllWindows()
-# 다음 인식을 위해 뒤로 조금 감
-tello.move_back(60)
-time.sleep(2)
+# 도형들이 위치한 높이까지 올라간다.
 tello.move_up(60)
-tello.send_rc_control(0, 0, 0, 0)
+# detection_figure(tello, Color.RED, Figure.TRI)
+
+"""
+    Flag 1 수행
+"""
+
+# 원하는 도형을 발견할 때까지 회전
+rotate_until_find(tello, Color.RED, Figure.TRI)
+
+# 도형이 중간에 오도록 드론을 이동시킨 후 contour를 그려서 사진 촬영
+tello_detection_figure(tello, Color.RED, Figure.TRI)
+
+# qr이 잘 보이도록 아래로 조금 가서 qr 인식
+tello.move_down(30)
+time.sleep(1)
+tello_detection_qr(tello)
+
+# 도형들이 있는 높이로 이동
+tello.move_up(60)
+time.sleep(1)
+
+"""
+    Flag 2 수행
+"""
+
+# 원하는 도형을 발견할 때까지 회전
+rotate_until_find(tello, Color.GREEN, Figure.CIRCLE)
+
+# 도형이 중간에 오도록 드론을 이동시킨 후 contour를 그려서 사진 촬영
+tello_detection_figure(tello, Color.GREEN, Figure.CIRCLE)
+
+# qr이 잘 보이도록 아래로 조금 가서 qr 인식
+tello.move_down(60)
+time.sleep(1)
+tello_detection_qr(tello)
+
+# 도형들이 있는 높이로 이동
+tello.move_up(60)
+time.sleep(1)
+
+"""
+    Flag 3 수행
+"""
+
+# 원하는 도형을 발견할 때까지 회전
+rotate_until_find(tello, Color.RED, Figure.CIRCLE)
+
+# 도형이 중간에 오도록 드론을 이동시킨 후 contour를 그려서 사진 촬영
+tello_detection_figure(tello, Color.RED, Figure.CIRCLE)
+
+# qr이 잘 보이도록 아래로 조금 가서 qr 인식
+tello.move_down(30)
+time.sleep(1)
+
+# 도형들이 있는 높이로 이동
+tello.land()

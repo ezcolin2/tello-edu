@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 import pyzbar.pyzbar as pyzbar
-from config import *
+from module.config import *
 
 def find_color(img, color, figure):
     """

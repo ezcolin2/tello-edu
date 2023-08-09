@@ -1,5 +1,5 @@
-from image_processing_module import *
-from tello_tracking_module import *
+from module.image_processing_module import *
+from module.tello_tracking_module import *
 
 import time
 def web_cam_detection_figure(webcam_cap, color, figure):
