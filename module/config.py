@@ -40,6 +40,13 @@ count = [
 ]
 
 # PID 제어 관련 설정
-fb_range = [20000, 24000]
+fb_range = [24000, 28000]
 ud_range = [0.3 * cam_height, 0.7 * cam_height]
 pid = [0.1, 0.1, 0] # proportional, integrate, deriative
+
+min_find_area = 5000 # 찾기 위한 최소 면적
+find_range = 0.3 # 찾기 위한 contour의 중심 좌표의 범위
+
+center_range = 0.3 # 중심에 있다고 판단하기 위한 중심 좌표의 범위
+
+aspect_ratio_range = 0.1 # 정면에 있다고 판단할 가로세로비율

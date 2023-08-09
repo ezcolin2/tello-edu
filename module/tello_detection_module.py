@@ -87,7 +87,12 @@ def move_until_find_figure(tello, color, figure, direction):
         cv2.imshow("asdf", img)
         contour_info, figureType = find_color(img, color, figure)
         x, y, w, h = contour_info
-        if cam_width * 0.2 <= x + w // 2 <= cam_width * 0.8 and cam_height * 0.2 <= y + h // 2 <= cam_height * 0.8 and figureType >= 0 and w * h > 5000:
+        if (
+                cam_width * (0.5 - find_range) <= x + w // 2 <= cam_width * (0.5 + find_range)
+                and cam_height * (0.5 - find_range) <= y + h // 2 <= cam_height * (0.5 + find_range)
+                and figureType >= 0
+                and w * h > min_find_area
+        ):
             cnt += 1
             tello.send_rc_control(0, 0, 0, 0)
             break
@@ -119,7 +124,12 @@ def move_until_find_qr(tello, direction):
         barcode = barcode_info[4]
         cv2.imshow("asdf", img)
         x, y, w, h = contour_info
-        if cam_width * 0.2 <= x + w // 2 <= cam_width * 0.8 and cam_height * 0.2 <= y + h // 2 <= cam_height * 0.8 and barcode is not None and w * h > 5000:
+        if (
+                cam_width * (0.5 - find_range) <= x + w // 2 <= cam_width * (0.5 + find_range)
+                and cam_height * (0.5 - find_range) <= y + h // 2 <= cam_height * (0.5 + find_range)
+                and barcode is not None
+                and w * h > min_find_area
+        ):
             cnt += 1
             tello.send_rc_control(0, 0, 0, 0)
             break
