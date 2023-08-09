@@ -11,6 +11,19 @@ class Figure(Enum):
     TRI = 0
     CIRCLE = 1
 
+class Direction(Enum):
+    """
+    Tello 객체의 send_rc_control 메소드의 인자로 들어갈 값.
+    홀수라면 음수이고 짝수라면 양수임.
+    """
+    RIGHT = 0
+    LEFT = 1
+    FORWARD = 2
+    BACKWARD = 3
+    UP = 4
+    DOWN = 5
+    CLOCKWISE = 6
+    COUNTERCLOCKWISE = 7
 # h_min, s_min, v_min, h_max, s_max, v_max 순서
 red = [0, 105, 0, 24, 255, 255]  # 빨강
 green = [57, 27, 0, 90, 255, 255]  # 초록

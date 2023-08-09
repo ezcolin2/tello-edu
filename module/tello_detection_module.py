@@ -17,7 +17,6 @@ def tello_detection_figure(tello, color, figure):
         my_frame = frame_read.frame
         img = cv2.resize(my_frame, (cam_width, cam_height))
         contour_info, figure_type = find_color(img, color, figure)
-        print(contour_info, figure_type)
         cv2.imshow("Video", img)
 
         # 이미지 이름 정하기
@@ -35,7 +34,6 @@ def tello_detection_figure(tello, color, figure):
 
         # 객체 가운데로
         success, p_error = track_figure(tello, contour_info,  pid, p_error)
-        # print(success, p_error)
         if success:
             cv2.imwrite(f"images/{image_name}.png", img)
             break
@@ -73,7 +71,8 @@ def tello_detection_qr(tello):
             break
     cv2.destroyAllWindows()
     tello.send_rc_control(0, 0, 0, 0)
-def rotate_until_find(tello, color, figure):
+
+def move_until_find_figure(tello, color, figure, direction):
     """
     원하는 색상의 도형을 찾을 때까지 회전
     :param tello: Tello 객체
@@ -81,12 +80,12 @@ def rotate_until_find(tello, color, figure):
     """
     cnt = 0
     while cnt < 4:
+        velocity = [0, 0, 0, 0] # send_rc_control의 인자로 들어갈 값.
         frame_read = tello.get_frame_read()
         myFrame = frame_read.frame
         img = cv2.resize(myFrame, (cam_width, cam_height))
         cv2.imshow("asdf", img)
         contour_info, figureType = find_color(img, color, figure)
-        print(contour_info, figureType)
         x, y, w, h = contour_info
         if cam_width * 0.2 <= x + w // 2 <= cam_width * 0.8 and cam_height * 0.2 <= y + h // 2 <= cam_height * 0.8 and figureType >= 0 and w * h > 5000:
             cnt += 1
@@ -94,7 +93,43 @@ def rotate_until_find(tello, color, figure):
             break
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
-        tello.send_rc_control(0, 0, 0, 20)
+        v = 20
+        if direction.value%2==1: # 홀수라면 음수로 바꿈
+            v=-v
+        velocity[direction.value//2] = v
+        tello.send_rc_control(*velocity)
+    print("감지 ")
+    tello.send_rc_control(0, 0, 0, 0)
+    cv2.destroyAllWindows()
+def move_until_find_qr(tello, direction):
+    """
+    원하는 색상의 도형을 찾을 때까지 회전
+    :param tello: Tello 객체
+    :return: 없음
+    """
+    cnt = 0
+    while cnt < 4:
+        velocity = [0, 0, 0, 0] # send_rc_control의 인자로 들어갈 값.
+        frame_read = tello.get_frame_read()
+        myFrame = frame_read.frame
+        img = cv2.resize(myFrame, (cam_width, cam_height))
+        barcode_info, img = read_img(img)
+        cv2.imshow("QR detection", img)
+        contour_info = barcode_info[:4]
+        barcode = barcode_info[4]
+        cv2.imshow("asdf", img)
+        x, y, w, h = contour_info
+        if cam_width * 0.2 <= x + w // 2 <= cam_width * 0.8 and cam_height * 0.2 <= y + h // 2 <= cam_height * 0.8 and barcode is not None and w * h > 5000:
+            cnt += 1
+            tello.send_rc_control(0, 0, 0, 0)
+            break
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+        v = 20
+        if direction.value%2==1: # 홀수라면 음수로 바꿈
+            v=-v
+        velocity[direction.value//2] = v
+        tello.send_rc_control(*velocity)
     print("감지 ")
     tello.send_rc_control(0, 0, 0, 0)
     cv2.destroyAllWindows()

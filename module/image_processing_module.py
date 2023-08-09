@@ -17,12 +17,9 @@ def find_color(img, color, figure):
     imgHSV = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     lower = np.array([myColors[color.value][0:3]])
     upper = np.array([myColors[color.value][3:6]])
-    # print(lower, upper)
     mask = cv2.inRange(imgHSV, lower, upper)
     cv2.imshow("mask", mask)
     contour_info, objType = get_contours(img, mask, figure)
-    # print(is_center(x, y))
-    # print(x, y)
     return contour_info, objType
 
 def find_qr(img, decoder):
@@ -35,8 +32,6 @@ def find_qr(img, decoder):
     data, points, _ = decoder.detectAndDecode(img)
 
     if len(data) !=0 and points is not None:
-        # print('Decoded data: ' + data)
-        # print(f'point : {points}')
         return True
 
         points = points[0]
@@ -46,8 +41,6 @@ def find_qr(img, decoder):
             cv2.line(img, pt1, pt2, color=(255, 0, 0), thickness=3)
 
         cv2.imshow('Detected QR code', img)
-        # cv2.waitKey(0)
-        # cv2.destroyAllWindows()
     return False
 
 def get_contours(img, mask, figure):
@@ -86,16 +79,13 @@ def get_contours(img, mask, figure):
                 figureTypeArea.append((x, y, w, h))
             if figure.value == Figure.TRI.value and objType == 3:
                 print('tri')
-            # if figure.value==Figure.TRI.value:
-            #     print('tri')
             elif count[figure.value][0]<=objType <= count[figure.value][1]:
-            # elif figure.value == Figure.CIRCLE.value and objType>=4:
                 print(f'circle : {objType}')
                 print('circle')
 
             # # 도형 주변에 표시하고 contour 정보 리스트에 추가
-
             cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 0), 2)
+
     if len(figureTypeArea)!=0 and len(figureTypeList)!=0:
         # 면적 큰 순으로 정렬
         temp = sorted(figureTypeArea, key = lambda x : x[2]*x[3])
@@ -127,7 +117,6 @@ def read_img(img):
         arr.append((x, y, w, h, barcode))
         # 바코드 데이터 디코딩
         barcode_info = barcode.data.decode('utf-8')
-        # print(barcode_info)
         # 인식한 바코드 사각형 표시
         cv2.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), 2)
         # 인식한 바코드 사각형 위에 글자 삽입
