@@ -19,23 +19,29 @@ def tello_detection_figure(tello, color, figure):
         contour_info, figure_type = find_color(img, color, figure)
         cv2.imshow("Video", img)
 
-        # 이미지 이름 정하기
-        image_name="" # 저장할 이미지 이름
-        if color==Color.RED:
-            image_name+="red"
-        elif color==Color.GREEN:
-            image_name+="green"
-        elif color==Color.BLUE:
-            image_name+="blue"
-        if figure==Figure.TRI:
-            image_name+=" triangle"
-        elif figure==Figure.CIRCLE:
-            image_name+=" circle"
 
         # 객체 가운데로
         success, p_error = track_figure(tello, contour_info,  pid, p_error)
         if success:
+            # 이미지 이름 정하기
+            image_name = ""  # 저장할 이미지 이름
+            if color == Color.RED:
+                image_name += "red"
+            elif color == Color.GREEN:
+                image_name += "green"
+            elif color == Color.BLUE:
+                image_name += "blue"
+            if figure == Figure.TRI:
+                image_name += " triangle"
+            elif figure == Figure.CIRCLE:
+                image_name += " circle"
             cv2.imwrite(f"images/{image_name}.png", img)
+
+            # 터미널에 front, back 출력
+            if figure == Figure.CIRCLE:
+                print('Front')
+            elif figure == Figure.TRI:
+                print('Back')
             break
         # q를 누르면 무한 반복에서 빠져나옴
         if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -60,6 +66,9 @@ def tello_detection_qr(tello):
         barcode = barcode_info[4]
         if barcode==None:
             continue
+        else:
+            print(barcode.data.decode('utf-8'))
+            break
         # 객체 가운데로
         success, p_error = track_figure(tello, contour_info, pid, p_error)
         if success:
@@ -125,8 +134,8 @@ def move_until_find_qr(tello, direction):
         cv2.imshow("asdf", img)
         x, y, w, h = contour_info
         if (
-                cam_width * (0.5 - find_range) <= x + w // 2 <= cam_width * (0.5 + find_range)
-                and cam_height * (0.5 - find_range) <= y + h // 2 <= cam_height * (0.5 + find_range)
+                cam_width * (0.5 - find_range_qr) <= x + w // 2 <= cam_width * (0.5 + find_range_qr)
+                and cam_height * (0.5 - find_range_qr) <= y + h // 2 <= cam_height * (0.5 + find_range_qr)
                 and barcode is not None
                 and w * h > min_find_area
         ):

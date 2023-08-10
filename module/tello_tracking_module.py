@@ -39,10 +39,10 @@ def track_figure(tello, contour_info, pid, p_error):
 
         if ud_range[0] <= y+h//2 <=ud_range[1]:
             ud = 0
-        elif y+h//2 > ud_range[1]: # 너무 아래라면 위로
-            ud = -10
+        elif y+h//2 > ud_range[1]: # 너무 위라면 아래로
+            ud = -20
         elif y+h//2 < ud_range[0]: # 너무 아래라면 위로
-            ud = 10
+            ud = 20
 
         if x == 0:
             speed = 0
@@ -77,13 +77,12 @@ def track_figure(tello, contour_info, pid, p_error):
         if ud_range[0] <= y+h//2 <=ud_range[1]:
             ud = 0
         elif y+h//2 > ud_range[1]: # 너무 아래라면 위로
-            ud = -10
+            ud = -20
         elif y+h//2 < ud_range[0]: # 너무 아래라면 위로
-            ud = 10
+            ud = 20
 
         if x==0:
             speed = 0
             error = 0
-        # print(f'fb : {fb} ud : {ud} speed : {speed}')
         tello.send_rc_control(0, fb, ud, speed)
         return False, error

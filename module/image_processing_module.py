@@ -73,15 +73,15 @@ def get_contours(img, mask, figure):
             approx = cv2.approxPolyDP(cnt, 0.02*peri, True)
             objType = len(approx)
             if count[figure.value][0] <= objType <= count[figure.value][1]:
-                print("ok")
+                # print("ok")
                 x, y, w, h = cv2.boundingRect(approx)
                 figureTypeList.append(objType)
                 figureTypeArea.append((x, y, w, h))
-            if figure.value == Figure.TRI.value and objType == 3:
-                print('tri')
-            elif count[figure.value][0]<=objType <= count[figure.value][1]:
-                print(f'circle : {objType}')
-                print('circle')
+            # if figure.value == Figure.TRI.value and objType == 3:
+            #     print('tri')
+            # elif count[figure.value][0]<=objType <= count[figure.value][1]:
+            #     print(f'circle : {objType}')
+            #     print('circle')
 
             # # 도형 주변에 표시하고 contour 정보 리스트에 추가
             cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 0), 2)
@@ -94,9 +94,7 @@ def get_contours(img, mask, figure):
 
         # 가장 큰 면적의 인덱스를 통해서 가장 큰 하나의 contour의 objType 알아내기
         max_idx = figureTypeArea.index(temp[0])
-    print(max_idx)
     if max_idx != -1:
-        print(max_idx)
         figure_type = figureTypeList[max_idx]
     return (x, y, w, h), figure_type
 
