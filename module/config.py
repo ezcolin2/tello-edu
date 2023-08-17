@@ -7,9 +7,12 @@ class Color(Enum):
     RED = 0
     GREEN = 1
     BLUE = 2
+    BLACK = 3
 class Figure(Enum):
     TRI = 0
     CIRCLE = 1
+    RECTANGLE = 2
+    NUMBER = 3
 
 class Direction(Enum):
     """
@@ -25,18 +28,22 @@ class Direction(Enum):
     CLOCKWISE = 6
     COUNTERCLOCKWISE = 7
 # h_min, s_min, v_min, h_max, s_max, v_max 순서
-red = [0, 105, 0, 24, 255, 255]  # 빨강
-green = [57, 27, 0, 90, 255, 255]  # 초록
-blue = [107, 44, 0, 129, 255, 255]  # 파랑
+red = [0, 22, 0, 12, 255, 255]  # 빨강
+green = [58, 79, 0, 105, 255, 255]  # 초록
+blue = [102, 44, 59, 130, 255, 209]  # 파랑
+black = [0, 0, 0, 100, 88, 58] # 검정
 myColors = [
     red,
     green,
-    blue
+    blue,
+    black
 ]
 # 도형 점의 개수
 count = [
     [3, 4], # 삼각형
-    [7, 9]  # 원
+    [7, 9], # 원
+    [4, 5],  # 사각형
+    [1, 255] # 숫자
 ]
 
 # PID 제어 관련 설정

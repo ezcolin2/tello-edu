@@ -1,6 +1,6 @@
 import numpy as np
 from module.config import *
-def track_figure(tello, contour_info, pid, p_error):
+def track_figure(tello, contour_info, pid, p_error, same_ratio=True):
     """
     객체가 가운데에 올 수 있게끔 조절하는 함수.
     PID를 통해 오차를 계산해서 객체가 중간에 있는지를 알려주는 boolean 값과 오차값 반환.
@@ -8,6 +8,7 @@ def track_figure(tello, contour_info, pid, p_error):
     :param contour_info : (x, y, w, h)
     :param pid : [비례, 적분, 미분]
     :param p_error : 오차
+    :param same_ratio : 만약 외접 정사각형을 원하는지
     :return : 객체 중간 여부, 오차값
     """
     # pid 적용
@@ -19,7 +20,7 @@ def track_figure(tello, contour_info, pid, p_error):
     # 가로세로비가 적절하지 않다면 정면이 아닌 측면에서 보고 있다는 뜻
     # 최대한 정면에서 보게끔 이동
 
-    if aspect_ratio < 1.0-aspect_ratio_range or aspect_ratio > 1.0 + aspect_ratio_range:
+    if same_ratio and aspect_ratio < 1.0-aspect_ratio_range or aspect_ratio > 1.0 + aspect_ratio_range:
         # contour 중심과 이미지 중심 좌표의 차이
         error = x + w // 2 - cam_width // 2
         speed = pid[0] * error + pid[1] * (error - p_error)

@@ -5,7 +5,8 @@ from module.config import *
 import time
 from djitellopy import Tello
 import logging
-logging.basicConfig(level=logging.WARNING)
+logging.getLogger('djitellopy').setLevel(logging.WARNING)  # 또는 logging.ERROR 등
+
 
 tello = Tello()
 decoder = cv2.QRCodeDetector()
@@ -30,8 +31,7 @@ tello.send_rc_control(0, 0, 0, 0)
 tello.takeoff()
 time.sleep(2)
 # 도형들이 위치한 높이까지 올라간다.
-tello.move_up(60)
-
+tello.move_up(120)
 def mission(tello, color, figure):
     """
     1. 원하는 색상, 모양의 도형을 찾을 때까지 회전
@@ -47,27 +47,18 @@ def mission(tello, color, figure):
     move_until_find_figure(tello, color, figure, Direction.CLOCKWISE)
 
     # 도형이 중간에 오도록 드론을 이동시킨 후 contour를 그려서 사진 촬영
-    tello_detection_figure(tello, color, figure)
+    tello_detection_number(tello)
 
-    # qr이 잘 보이도록 아래로 조금 가서 qr 인식
-    move_until_find_qr(tello, Direction.DOWN)
-    time.sleep(1)
-    tello_detection_qr(tello)
+    # 숫자 검출
+    move_until_find_number(tello, Figure.NUMBER, Direction.DOWN)
 
-    # 도형들이 있는 높이로 이동
-    tello.move_back(30)
-    time.sleep(1)
-    move_until_find_figure(tello, color, figure, Direction.UP)
-    time.sleep(1)
+    # 숫자 가운데로
+    tello_detection_number(tello)
+
 """
     Flag 1 수행
 """
-mission(tello, Color.RED, Figure.TRI)
-
-"""
-    Flag 2 수행
-"""
-mission(tello, Color.GREEN, Figure.CIRCLE)
-mission(tello, Color.RED, Figure.CIRCLE)
-
+mission(tello, Color.RED, Figure.RECTANGLE)
+# move_until_find_number(tello, Figure.NUMBER, Direction.DOWN)
+# tello_detection_number(tello)
 tello.land()

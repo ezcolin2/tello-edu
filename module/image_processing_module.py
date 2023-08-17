@@ -18,6 +18,8 @@ def find_color(img, color, figure):
     lower = np.array([myColors[color.value][0:3]])
     upper = np.array([myColors[color.value][3:6]])
     mask = cv2.inRange(imgHSV, lower, upper)
+    kernel = np.ones((5, 5), np.uint8)
+    mask = cv2.dilate(mask, kernel, iterations=2)
     cv2.imshow("mask", mask)
     contour_info, objType = get_contours(img, mask, figure)
     return contour_info, objType
