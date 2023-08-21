@@ -44,13 +44,12 @@ def mission(tello, color, figure):
     :return:
     """
     # 원하는 도형을 발견할 때까지 회전
-    move_until_find_figure(tello, color, figure, Direction.CLOCKWISE)
-
-    # 도형이 중간에 오도록 드론을 이동시킨 후 contour를 그려서 사진 촬영
-    tello_detection_number(tello)
-
+    # move_until_find_figure(tello, color, figure, Direction.CLOCKWISE)
     # 숫자 검출
     move_until_find_number(tello, Figure.NUMBER, Direction.DOWN)
+    # tello_detection_figure(tello, color, figure)
+    # 도형이 중간에 오도록 드론을 이동시킨 후 contour를 그려서 사진 촬영
+
 
     # 숫자 가운데로
     tello_detection_number(tello)

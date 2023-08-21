@@ -125,3 +125,32 @@ def read_img(img):
     if len(arr)==0: # 비어있다면
         arr.append((-1, -1, -1, -1, None))
     return arr[0], img
+
+def delete_color(img):
+    """
+    모든 색깔을 흰색으로 칠해서 반환
+    :param img: 원본 이미지
+    :return: 색깔을 흰색으로 칠한 이미지
+    """
+
+    # HSV 색 공간으로 변경
+    hsv_image = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+
+    # 커널
+    kernel = np.ones((5, 5), np.uint8)
+
+    # HSV 범위
+    lower_color = np.array([0, 110, 0])
+    upper_color = np.array([180, 255, 255])
+
+    # 마스크 생성
+    mask = cv2.inRange(hsv_image, lower_color, upper_color)
+
+    # 노이즈 제거
+    dilated_mask = cv2.dilate(mask, kernel, iterations=2)
+
+    temp_img = np.copy(img)
+
+    # 해당 범위의 색상 전부 흰색으로 변경
+    temp_img[dilated_mask > 0] = [255, 255, 255]
+    return temp_img

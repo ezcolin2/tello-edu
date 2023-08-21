@@ -42,7 +42,7 @@ myColors = [
 count = [
     [3, 4], # 삼각형
     [7, 9], # 원
-    [4, 5],  # 사각형
+    [4, 4],  # 사각형
     [1, 255] # 숫자
 ]
 
@@ -51,6 +51,8 @@ fb_range = [24000, 28000]
 ud_range = [0.4 * cam_height, 0.6 * cam_height]
 pid = [0.1, 0.1, 0] # proportional, integrate, deriative
 
+# 숫자는 크기가 작기 때문에 범위 줄임
+fb_range_number = [6000, 10000]
 min_find_area = 3000 # 찾기 위한 최소 면적
 find_range = 0.3 # 찾기 위한 contour의 중심 좌표의 범위
 find_range_qr = 0.45 # qr을 찾기 위한 contour의 중심 좌표의 범위

@@ -9,7 +9,6 @@ def tello_detection_figure(tello, color, figure):
     :return: 도형 감지 여부 반환
     """
 
-    # 가장 먼저 해당 도형을 찾기 위해 회전한다.
 
     p_error = 0
     while True:
@@ -98,15 +97,17 @@ def tello_detection_number(tello):
         frame_read = tello.get_frame_read()
         my_frame = frame_read.frame
         img = cv2.resize(my_frame, (cam_width, cam_height))
+        cv2.imshow("origin", img)
+        img = delete_color(img)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        thr, mask = cv2.threshold(img, 25, 255, cv2.THRESH_BINARY_INV)
+        thr, mask = cv2.threshold(img, 95, 255, cv2.THRESH_BINARY_INV)
         mask = cv2.dilate(mask, kernel, iterations=1)
         contour_info, figure_type = get_contours(img, mask, Figure.NUMBER)
         cv2.imshow("Video", img)
 
 
         # 객체 가운데로
-        success, p_error = track_figure(tello, contour_info,  pid, p_error, False)
+        success, p_error = track_number(tello, contour_info,  pid, p_error, False)
         if success:
             # 이미지 이름 정하기
             image_name = "num"  # 저장할 이미지 이름
@@ -213,8 +214,11 @@ def move_until_find_number(tello, figure, direction):
         frame_read = tello.get_frame_read()
         myFrame = frame_read.frame
         img = cv2.resize(myFrame, (cam_width, cam_height))
+        cv2.imshow("original", img)
+        img = delete_color(img)
+        cv2.imshow("delete", img)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        thr, mask = cv2.threshold(img, 25, 255, cv2.THRESH_BINARY_INV)
+        thr, mask = cv2.threshold(img, 95, 255, cv2.THRESH_BINARY_INV)
         mask = cv2.dilate(mask, kernel, iterations=1)
         contour_info, figureType = get_contours(img, mask, Figure.NUMBER)
         cv2.imshow("asdf", img)
@@ -224,7 +228,7 @@ def move_until_find_number(tello, figure, direction):
                 cam_width * (0.5 - find_range) <= x + w // 2 <= cam_width * (0.5 + find_range)
                 and cam_height * (0.5 - find_range) <= y + h // 2 <= cam_height * (0.5 + find_range)
                 and figureType >= 0
-                and w * h > min_find_area
+                # and w * h > min_find_area
         ):
             cnt += 1
             tello.send_rc_control(0, 0, 0, 0)
