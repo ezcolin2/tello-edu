@@ -31,7 +31,7 @@ tello.send_rc_control(0, 0, 0, 0)
 tello.takeoff()
 time.sleep(2)
 # 도형들이 위치한 높이까지 올라간다.
-tello.move_up(120)
+tello.move_up(90)
 def mission(tello, color, figure):
     """
     1. 원하는 색상, 모양의 도형을 찾을 때까지 회전
@@ -45,9 +45,9 @@ def mission(tello, color, figure):
     """
     # 원하는 도형을 발견할 때까지 회전
     # move_until_find_figure(tello, color, figure, Direction.CLOCKWISE)
+    tello_detection_figure(tello, color, figure)
     # 숫자 검출
     move_until_find_number(tello, Figure.NUMBER, Direction.DOWN)
-    # tello_detection_figure(tello, color, figure)
     # 도형이 중간에 오도록 드론을 이동시킨 후 contour를 그려서 사진 촬영
 
 
