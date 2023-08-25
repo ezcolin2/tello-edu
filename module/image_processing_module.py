@@ -66,7 +66,7 @@ def get_contours(img, mask, figure):
     for cnt in contours:
         area = cv2.contourArea(cnt)
         # minimum threshold를 정하면 noise를 줄일 수 있음
-        if area > 300: # area가 500보다 클 때만 contour 그리기
+        if area > 500: # area가 500보다 클 때만 contour 그리기
             # cv2.drawContours(img, cnt, -1, (255, 0, 0), 3)
             # curve 길이 구하기
             peri = cv2.arcLength(cnt, True)

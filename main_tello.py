@@ -54,10 +54,11 @@ def mission(tello, color, figure):
     # 숫자 가운데로
     tello_detection_number(tello)
 
-"""
-    Flag 1 수행
-"""
-mission(tello, Color.RED, Figure.RECTANGLE)
-# move_until_find_number(tello, Figure.NUMBER, Direction.DOWN)
-# tello_detection_number(tello)
-tello.land()
+tello.send_command('cw 180')
+move_until_find_figure(tello, Color.GREEN, Figure.RECTANGLE, Direction.UP)
+tello_detection_figure(tello, Color.GREEN, Figure.RECTANGLE)
+tello.move_forward(150)
+
+move_until_find_figure(tello, Color.RED, Figure.RECTANGLE, Direction.CLOCKWISE)
+tello_detection_figure(tello, Color.RED, Figure.RECTANGLE)
+tello.move_forward(150)

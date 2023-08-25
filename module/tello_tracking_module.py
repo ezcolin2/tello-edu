@@ -30,9 +30,9 @@ def track_figure(tello, contour_info, pid, p_error, same_ratio=True):
         area = w * h
         if fb_range[0] <= area <= fb_range[1]:  # 적당하다면 멈춤
             fb = 0
-            # if 0.2 * cam_width <= x + w // 2 <= 0.8 * cam_width and 0.2 * cam_height <= y + h // 2 <= 0.8 * cam_height:
-            #     # if speed==0:
-            #     return True, error
+            if 0.2 * cam_width <= x + w // 2 <= 0.8 * cam_width and 0.2 * cam_height <= y + h // 2 <= 0.8 * cam_height:
+                # if speed==0:
+                return True, error
         elif area > fb_range[1]:  # 너무 가깝다면 뒤로
             fb = -10
         elif area < fb_range[0] and area != 0:  # 너무 멀다면 앞으로
