@@ -1,11 +1,12 @@
 from module.image_processing_module import *
 from module.tello_tracking_module import *
-def tello_detection_figure(tello, color, figure):
+def tello_detection_figure(tello, color, figure, brightness=0):
     """
     인자로 들어온 색과 모양으로 해당 도형을 감지 여부 반환
     :param tello : Tello
     :param color : 색상
     :param figure : 도형
+    :param brightness : 드론으로 찍은 사진 밝기 조절 값
     :return: 도형 감지 여부 반환
     """
 
@@ -14,6 +15,7 @@ def tello_detection_figure(tello, color, figure):
     while True:
         frame_read = tello.get_frame_read()
         my_frame = frame_read.frame
+        my_frame += brightness
         img = cv2.resize(my_frame, (cam_width, cam_height))
         contour_info, figure_type = find_color(img, color, figure)
         cv2.imshow("Video", img)
@@ -47,7 +49,7 @@ def tello_detection_figure(tello, color, figure):
             break
     cv2.destroyAllWindows()
     tello.send_rc_control(0, 0, 0, 0)
-def tello_detection_qr(tello):
+def tello_detection_qr(tello, brightness=0):
     """
     Tello를 인자로 받아서 이미지를 얻어낸 후 qr이 있다면 감지 후 contour 그리기
     :param tello : Tello 객체
@@ -58,6 +60,7 @@ def tello_detection_qr(tello):
     while True:
         frame_read = tello.get_frame_read()
         myFrame = frame_read.frame
+        myFrame += brightness
         img = cv2.resize(myFrame, (cam_width, cam_height))
         barcode_info, img = read_img(img)
         cv2.imshow("QR detection", img)
@@ -79,7 +82,7 @@ def tello_detection_qr(tello):
             break
     cv2.destroyAllWindows()
     tello.send_rc_control(0, 0, 0, 0)
-def tello_detection_number(tello):
+def tello_detection_number(tello, brightness=0):
     """
     인자로 들어온 색과 모양으로 해당 도형을 감지 여부 반환
     :param tello : Tello
@@ -96,6 +99,7 @@ def tello_detection_number(tello):
     while True:
         frame_read = tello.get_frame_read()
         my_frame = frame_read.frame
+        my_frame += brightness
         img = cv2.resize(my_frame, (cam_width, cam_height))
         cv2.imshow("origin", img)
         img = delete_color(img)
@@ -124,7 +128,7 @@ def tello_detection_number(tello):
             break
     cv2.destroyAllWindows()
     tello.send_rc_control(0, 0, 0, 0)
-def move_until_find_figure(tello, color, figure, direction):
+def move_until_find_figure(tello, color, figure, direction, brightness=0):
     """
     원하는 색상의 도형을 찾을 때까지 회전
     :param tello: Tello 객체
@@ -139,6 +143,7 @@ def move_until_find_figure(tello, color, figure, direction):
         velocity = [0, 0, 0, 0] # send_rc_control의 인자로 들어갈 값.
         frame_read = tello.get_frame_read()
         myFrame = frame_read.frame
+        myFrame += brightness
         img = cv2.resize(myFrame, (cam_width, cam_height))
         cv2.imshow("asdf", img)
         contour_info, figureType = find_color(img, color, figure)
@@ -161,7 +166,7 @@ def move_until_find_figure(tello, color, figure, direction):
         tello.send_rc_control(*velocity)
     tello.send_rc_control(0, 0, 0, 0)
     cv2.destroyAllWindows()
-def move_until_find_qr(tello, direction):
+def move_until_find_qr(tello, direction, brightness=0):
     """
     원하는 색상의 도형을 찾을 때까지 회전
     :param tello: Tello 객체
@@ -172,6 +177,7 @@ def move_until_find_qr(tello, direction):
         velocity = [0, 0, 0, 0] # send_rc_control의 인자로 들어갈 값.
         frame_read = tello.get_frame_read()
         myFrame = frame_read.frame
+        myFrame += brightness
         img = cv2.resize(myFrame, (cam_width, cam_height))
         barcode_info, img = read_img(img)
         cv2.imshow("QR detection", img)
@@ -199,7 +205,7 @@ def move_until_find_qr(tello, direction):
     tello.send_rc_control(0, 0, 0, 0)
     cv2.destroyAllWindows()
 
-def move_until_find_number(tello, figure, direction):
+def move_until_find_number(tello, figure, direction, brightness=0):
     """
     숫자를 찾을 때까지 회전 (단순 검정 검출)
     :param tello: Tello 객체
@@ -213,6 +219,7 @@ def move_until_find_number(tello, figure, direction):
         velocity = [0, 0, 0, 0] # send_rc_control의 인자로 들어갈 값.
         frame_read = tello.get_frame_read()
         myFrame = frame_read.frame
+        myFrame += brightness
         img = cv2.resize(myFrame, (cam_width, cam_height))
         cv2.imshow("original", img)
         img = delete_color(img)

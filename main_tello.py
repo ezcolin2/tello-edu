@@ -31,7 +31,7 @@ tello.send_rc_control(0, 0, 0, 0)
 tello.takeoff()
 time.sleep(2)
 # 도형들이 위치한 높이까지 올라간다.
-tello.move_up(90)
+# tello.move_up(90)
 def mission(tello, color, figure):
     """
     1. 원하는 색상, 모양의 도형을 찾을 때까지 회전
@@ -54,11 +54,11 @@ def mission(tello, color, figure):
     # 숫자 가운데로
     tello_detection_number(tello)
 
-tello.send_command('cw 180')
-move_until_find_figure(tello, Color.GREEN, Figure.RECTANGLE, Direction.UP)
-tello_detection_figure(tello, Color.GREEN, Figure.RECTANGLE)
-tello.move_forward(150)
-
-move_until_find_figure(tello, Color.RED, Figure.RECTANGLE, Direction.CLOCKWISE)
-tello_detection_figure(tello, Color.RED, Figure.RECTANGLE)
-tello.move_forward(150)
+tello.rotate_clockwise(180)
+# move_until_find_figure(tello, Color.GREEN, Figure.RECTANGLE, Direction.UP)
+# tello_detection_figure(tello, Color.GREEN, Figure.RECTANGLE)
+# tello.move_forward(150)
+#
+# move_until_find_figure(tello, Color.RED, Figure.RECTANGLE, Direction.CLOCKWISE)
+# tello_detection_figure(tello, Color.RED, Figure.RECTANGLE)
+# tello.move_forward(150)
