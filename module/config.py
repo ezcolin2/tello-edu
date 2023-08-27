@@ -13,6 +13,7 @@ class Figure(Enum):
     CIRCLE = 1
     RECTANGLE = 2
     NUMBER = 3
+    ANY = 4
 
 class Direction(Enum):
     """
@@ -43,7 +44,8 @@ count = [
     [3, 4], # 삼각형
     [7, 9], # 원
     [3, 5],  # 사각형
-    [1, 255] # 숫자
+    [1, 255], # 숫자
+    [1, 1000] # 아무거나
 ]
 
 # PID 제어 관련 설정

@@ -58,7 +58,8 @@ def tello_detection_qr(tello, brightness=0):
     p_error = 0
 
     while True:
-        frame_read = tello.get_frame_read()
+        frame_read = tello.get_fra
+        me_read()
         myFrame = frame_read.frame
         myFrame += brightness
         img = cv2.resize(myFrame, (cam_width, cam_height))
