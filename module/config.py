@@ -7,7 +7,6 @@ class Color(Enum):
     RED = 0
     GREEN = 1
     BLUE = 2
-    BLACK = 3
 class Figure(Enum):
     TRI = 0
     CIRCLE = 1
@@ -30,14 +29,14 @@ class Direction(Enum):
     COUNTERCLOCKWISE = 7
 # h_min, s_min, v_min, h_max, s_max, v_max 순서
 red = [0, 86, 0, 10, 255, 255]  # 빨강
-green = [54, 99, 0, 75, 255, 255]  # 초록
+green = [42, 99, 0, 67, 255, 255]  # 초록
 blue = [113, 60, 0, 123, 255, 255]  # 파랑
-black = [0, 0, 0, 100, 88, 58] # 검정
+# black = [0, 0, 0, 100, 88, 58] # 검정
 myColors = [
     red,
     green,
-    blue,
-    black
+    blue
+    # black
 ]
 # 도형 점의 개수
 count = [

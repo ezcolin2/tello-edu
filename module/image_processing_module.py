@@ -23,6 +23,25 @@ def find_color(img, color, figure):
     cv2.imshow("mask", mask)
     contour_info, objType = get_contours(img, mask, figure)
     return contour_info, objType
+def find_color_with_all_contour(img, color, figure, min_area):
+    """
+    인자로 들어온 Color에 해당하는 도형이 있으면 외접 사각형의 (x, y, w, h) 리스트 반환
+    코드 참조 : https://github.com/murtazahassan/Learn-OpenCV-in-3-hours
+    :param img: 이미지 원본
+    :param color: Color enum
+    :return:
+    """
+
+    # 이거는 BGR2HSV 사용해야 함.
+    # HSV로 변환하면 grayscale로 바꿔주고 채널이 하나.
+    imgHSV = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    lower = np.array([myColors[color.value][0:3]])
+    upper = np.array([myColors[color.value][3:6]])
+    mask = cv2.inRange(imgHSV, lower, upper)
+    kernel = np.ones((5, 5), np.uint8)
+    mask = cv2.dilate(mask, kernel, iterations=2)
+    cv2.imshow("mask", mask)
+    return get_all_contours(img, mask, figure, min_area)
 
 def find_qr(img, decoder):
     """
@@ -99,6 +118,37 @@ def get_contours(img, mask, figure):
     if max_idx != -1:
         figure_type = figureTypeList[max_idx]
     return (x, y, w, h), figure_type
+def get_all_contours(img, mask, figure, min_area):
+    """
+    원하는 도형의 특정 넓이 이상의 모든 contour를 외접 사각형 그려서 (x, y, w, h) 리스트 반환
+    :param img: 이미지 원본 (웹캠)
+    :param mask: 원하는 색만 추출해낸 이미지
+    :return: (x, y, w, h) 리스트
+    """
+    # (이미지, retrieval method) RETR_EXTERNAL은 outer detail을 찾거나 outer corner를 찾을 때 유용함.
+    contours, hierarchy = cv2.findContours(mask, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
+
+    # (x, y, w h) 리스트
+    coord_list = []
+
+
+    for cnt in contours:
+        area = cv2.contourArea(cnt)
+        # minimum threshold를 정하면 noise를 줄일 수 있음
+        if area > min_area: # area가 500보다 클 때만 contour 그리기
+            # curve 길이 구하기
+            peri = cv2.arcLength(cnt, True)
+
+            # 점 위치
+            approx = cv2.approxPolyDP(cnt, 0.02*peri, True)
+            objType = len(approx)
+            if count[figure.value][0] <= objType <= count[figure.value][1]:
+                x, y, w, h = cv2.boundingRect(approx)
+                coord_list.append((x, y, w, h))
+    return coord_list
+
+
+
 
 def read_img(img):
     """

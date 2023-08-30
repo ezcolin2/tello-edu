@@ -1,12 +1,14 @@
 from module.image_processing_module import *
 from module.tello_tracking_module import *
-def tello_detection_figure(tello, color, figure, brightness=0):
+def tello_detection_figure(tello, color, figure, brightness=0, save=False, print=False):
     """
     인자로 들어온 색과 모양으로 해당 도형을 감지 여부 반환
     :param tello : Tello
     :param color : 색상
     :param figure : 도형
     :param brightness : 드론으로 찍은 사진 밝기 조절 값
+    :param save : 사진 저장 여부
+    :param print : front, back 출력 여부
     :return: 도형 감지 여부 반환
     """
 
@@ -15,8 +17,7 @@ def tello_detection_figure(tello, color, figure, brightness=0):
     while True:
         frame_read = tello.get_frame_read()
         my_frame = frame_read.frame
-        my_frame += brightness
-        img = cv2.resize(my_frame, (cam_width, cam_height))
+        img = cv2.resize(my_frame+brightness, (cam_width, cam_height))
         contour_info, figure_type = find_color(img, color, figure)
         cv2.imshow("Video", img)
 
@@ -36,14 +37,17 @@ def tello_detection_figure(tello, color, figure, brightness=0):
                 image_name += " triangle"
             elif figure == Figure.CIRCLE:
                 image_name += " circle"
-            cv2.imwrite(f"images/{image_name}.png", img)
 
-            # 터미널에 front, back 출력
-            if figure == Figure.CIRCLE:
-                print('Front')
-            elif figure == Figure.TRI:
-                print('Back')
-            break
+            if save:
+                cv2.imwrite(f"images/{image_name}.png", img)
+
+            if print:
+                # 터미널에 front, back 출력
+                if figure == Figure.CIRCLE:
+                    print('Front')
+                elif figure == Figure.TRI:
+                    print('Back')
+                break
         # q를 누르면 무한 반복에서 빠져나옴
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
@@ -61,8 +65,7 @@ def tello_detection_qr(tello, brightness=0):
         frame_read = tello.get_fra
         me_read()
         myFrame = frame_read.frame
-        myFrame += brightness
-        img = cv2.resize(myFrame, (cam_width, cam_height))
+        img = cv2.resize(myFrame+brightness, (cam_width, cam_height))
         barcode_info, img = read_img(img)
         cv2.imshow("QR detection", img)
         contour_info = barcode_info[:4]
@@ -100,8 +103,7 @@ def tello_detection_number(tello, brightness=0):
     while True:
         frame_read = tello.get_frame_read()
         my_frame = frame_read.frame
-        my_frame += brightness
-        img = cv2.resize(my_frame, (cam_width, cam_height))
+        img = cv2.resize(my_frame+brightness, (cam_width, cam_height))
         cv2.imshow("origin", img)
         img = delete_color(img)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -144,8 +146,7 @@ def move_until_find_figure(tello, color, figure, direction, brightness=0):
         velocity = [0, 0, 0, 0] # send_rc_control의 인자로 들어갈 값.
         frame_read = tello.get_frame_read()
         myFrame = frame_read.frame
-        myFrame += brightness
-        img = cv2.resize(myFrame, (cam_width, cam_height))
+        img = cv2.resize(myFrame+brightness, (cam_width, cam_height))
         cv2.imshow("asdf", img)
         contour_info, figureType = find_color(img, color, figure)
         x, y, w, h = contour_info
@@ -178,8 +179,7 @@ def move_until_find_qr(tello, direction, brightness=0):
         velocity = [0, 0, 0, 0] # send_rc_control의 인자로 들어갈 값.
         frame_read = tello.get_frame_read()
         myFrame = frame_read.frame
-        myFrame += brightness
-        img = cv2.resize(myFrame, (cam_width, cam_height))
+        img = cv2.resize(myFrame+brightness, (cam_width, cam_height))
         barcode_info, img = read_img(img)
         cv2.imshow("QR detection", img)
         contour_info = barcode_info[:4]
@@ -220,8 +220,7 @@ def move_until_find_number(tello, figure, direction, brightness=0):
         velocity = [0, 0, 0, 0] # send_rc_control의 인자로 들어갈 값.
         frame_read = tello.get_frame_read()
         myFrame = frame_read.frame
-        myFrame += brightness
-        img = cv2.resize(myFrame, (cam_width, cam_height))
+        img = cv2.resize(myFrame+brightness, (cam_width, cam_height))
         cv2.imshow("original", img)
         img = delete_color(img)
         cv2.imshow("delete", img)
