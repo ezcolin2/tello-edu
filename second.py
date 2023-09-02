@@ -1,13 +1,13 @@
 import colorama.ansi
 import cv2
 from module.tello_detection_module import *
-from module.config import *
+from module.params import *
 import time
 from djitellopy import Tello
 import logging
 
 from module.tello_detection_module import *
-from module.config import *
+from module.params import *
 from module.ai_module import *
 
 model = CNN()  # 모델 클래스 정의로 변경

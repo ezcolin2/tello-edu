@@ -1,7 +1,7 @@
 
 
 from module.tello_detection_module import *
-from module.config import *
+from module.params import *
 import time
 from djitellopy import Tello
 import logging

@@ -2,10 +2,9 @@ import cv2
 import numpy as np
 import pyzbar.pyzbar as pyzbar
 from module.config import *
-
 def find_color(img, color, figure):
     """
-    인자로 들어온 Color에 해당하는 도형이 있으면 도형을 포함하는 최소 사각형의 중심 좌표 반환
+    인자로 들어온 Color에 해당하는 도형이 있으면 외접 사각형의 중심 좌표 반환
     코드 참조 : https://github.com/murtazahassan/Learn-OpenCV-in-3-hours
     :param img: 이미지 원본
     :param color: Color enum

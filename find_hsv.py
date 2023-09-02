@@ -1,5 +1,5 @@
 import time
-from module.config import *
+from module.params import *
 from module.tello_detection_module import *
 from djitellopy import Tello
 import logging

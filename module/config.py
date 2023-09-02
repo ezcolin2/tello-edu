@@ -48,10 +48,6 @@ count = [
     [1, 1000] # 아무거나
 ]
 
-# PID 제어 관련 설정
-fb_range = [24000, 28000]
-ud_range = [0.4 * cam_height, 0.6 * cam_height]
-pid = [0.1, 0.1, 0] # proportional, integrate, deriative
 
 # 숫자는 크기가 작기 때문에 범위 줄임
 fb_range_number = [6000, 10000]
