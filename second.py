@@ -53,6 +53,7 @@ def find_number_with_color_rectangle(img, color, save=False, rectangle_contour=F
 
     :return: 숫자
     """
+    print('색, 숫자 매칭 시작')
     # 숫자가 짤리지 않게 패딩 추가
     padding = 20
 
@@ -62,9 +63,9 @@ def find_number_with_color_rectangle(img, color, save=False, rectangle_contour=F
     x, y, w, h = contour_info
     if rectangle_contour:
         coord_list = find_color_with_all_contour(img, color, Figure.RECTANGLE, 500)
-
-        for x, y, w, h in coord_list:
-            cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 0), 2)
+        #
+        # for x, y, w, h in coord_list:
+        #     cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 0), 2)
 
     temp = delete_color(img)
     temp = cv2.cvtColor(temp, cv2.COLOR_BGR2GRAY)
@@ -105,25 +106,25 @@ def find_number_with_color_rectangle(img, color, save=False, rectangle_contour=F
 
         # 이진화 된 이미지로 숫자 판단
         result = get_number_with_model(bin_img)
-
+        img_result = np.copy(img)
         # 숫자 contour 그려서 저장
         if save:
             # 외접 사각형 그리기
 
-            cv2.rectangle(img, (x, y), (x + w, y + h), (255, 255, 255), 2)
+            cv2.rectangle(img_result, (x, y), (x + w, y + h), (255, 255, 255), 2)
 
-            cv2.putText(img, str(result), (x + w // 2, y - 20), cv2.FONT_ITALIC, 1, (255, 255, 255), thickness=3)
+            cv2.putText(img_result, str(result), (x + w // 2, y - 20), cv2.FONT_ITALIC, 1, (255, 255, 255), thickness=3)
 
-            cv2.imwrite(f'second_result/{Color(color.value).name}_number.png', img)
+            cv2.imwrite(f'second_result/{Color(color.value).name}_number.png', img_result)
 
 
 
+    print('색, 숫자 매칭 완료')
     return result
 
-img = cv2.imread("tri10.png")
-img+=30
-n = find_number_with_color_rectangle(img, Color.RED, save=True, rectangle_contour=True)
-print(n)
+# # img+=30
+# # n = find_number_with_color_rectangle(img, Color.RED, save=True, rectangle_contour=True)
+# print(n)
 
 # TODO : 1. 원하는 색상 사각형이 가운데로 오게하는 코드 작성
 
@@ -154,9 +155,9 @@ def match_color_and_number(tello, brightness=0):
     blue = -1
 
     # 색깔별로 매칭되는 값 구하기
-    temp_r = find_number_with_color_rectangle(img, Color.RED)
-    temp_g = find_number_with_color_rectangle(img, Color.GREEN)
-    temp_b = find_number_with_color_rectangle(img, Color.BLUE)
+    temp_r = find_number_with_color_rectangle(img, Color.RED, save=True)
+    temp_g = find_number_with_color_rectangle(img, Color.GREEN, save=True)
+    temp_b = find_number_with_color_rectangle(img, Color.BLUE, save=True)
 
     # 아직 값이 정해지지 않는 색에 매칭
     if red==-1:
@@ -166,13 +167,21 @@ def match_color_and_number(tello, brightness=0):
     if blue==-1:
         blue = temp_b
 
+    print(f'첫 번째 숫자 인식 : {[(temp_r, Color.RED), (temp_g, Color.GREEN), (temp_b, Color.BLUE)]}')
+
+
+    time.sleep(2)
     # 옆으로 이동
-    tello.move_left(100)
+    tello.move_left(70)
+
+    frame_read = tello.get_frame_read()
+    my_frame = frame_read.frame
+    img = cv2.resize(my_frame+brightness, (cam_width, cam_height))
 
     # 색깔별로 매칭되는 값 구하기
-    temp_r = find_number_with_color_rectangle(img, Color.RED)
-    temp_g = find_number_with_color_rectangle(img, Color.GREEN)
-    temp_b = find_number_with_color_rectangle(img, Color.BLUE)
+    temp_r = find_number_with_color_rectangle(img, Color.RED, save=True)
+    temp_g = find_number_with_color_rectangle(img, Color.GREEN, save=True)
+    temp_b = find_number_with_color_rectangle(img, Color.BLUE, save=True)
 
     # 아직 값이 정해지지 않는 색에 매칭
     if red == -1:
@@ -182,13 +191,19 @@ def match_color_and_number(tello, brightness=0):
     if blue == -1:
         blue = temp_b
 
+    print(f'두 번째 숫자 인식 : {[(temp_r, Color.RED), (temp_g, Color.GREEN), (temp_b, Color.BLUE)]}')
     # 옆으로 이동
-    tello.move_right(200)
+    time.sleep(2)
+    tello.move_right(160)
+
+    frame_read = tello.get_frame_read()
+    my_frame = frame_read.frame
+    img = cv2.resize(my_frame+brightness, (cam_width, cam_height))
 
     # 색깔별로 매칭되는 값 구하기
-    temp_r = find_number_with_color_rectangle(img, Color.RED)
-    temp_g = find_number_with_color_rectangle(img, Color.GREEN)
-    temp_b = find_number_with_color_rectangle(img, Color.BLUE)
+    temp_r = find_number_with_color_rectangle(img, Color.RED, save=True)
+    temp_g = find_number_with_color_rectangle(img, Color.GREEN, save=True)
+    temp_b = find_number_with_color_rectangle(img, Color.BLUE, save=True)
 
     # 아직 값이 정해지지 않는 색에 매칭
     if red == -1:
@@ -197,20 +212,23 @@ def match_color_and_number(tello, brightness=0):
         green = temp_g
     if blue == -1:
         blue = temp_b
+    print(f'세 번째 숫자 인식 : {[(temp_r, Color.RED), (temp_g, Color.GREEN), (temp_b, Color.BLUE)]}')
 
     # 원위치로
 
-    tello.move_left(100)
-    print(red,green,blue)
+    time.sleep(2)
+    tello.move_left(70)
+    print([(red, Color.RED), (green, Color.GREEN), (blue, Color.BLUE)])
 
     # 만약 전부 찾지 못했다면 다시 반복
     if red==-1 or green==-1 or blue==-1:
-        return match_color_and_number(tello, brightness)
+        # return match_color_and_number(tello, brightness)
+        return "don't find"
 
     # RGB 순서로 값 반환
     result = [(red, Color.RED), (green, Color.GREEN), (blue, Color.BLUE)]
     result.sort()
-    print(result)
+    print(f'최종 숫자 : {[(red, Color.RED), (green, Color.GREEN), (blue, Color.BLUE)]}')
 
     return result
 
@@ -260,35 +278,43 @@ def match_color_and_number(tello, brightness=0):
 #     tello.send_rc_control(0, 0, 0, 0)
 #     cv2.destroyAllWindows()
 
-# logging.getLogger('djitellopy').setLevel(logging.WARNING)
-#
-# tello = Tello()
-# # 연결
-# tello.connect()
-# # 초기 세팅
-# tello.for_back_velocity = 0
-# tello.left_right_velocity = 0
-# tello.up_down_velocity = 0
-# tello.yaw_velocity = 0
-# tello.speed = 0
-# # 배터리 출력
-# print(tello.get_battery())
-#
-# # stream 끔
-# tello.streamoff()
-# # detection_qr(tello)
+logging.getLogger('djitellopy').setLevel(logging.WARNING)
+
+tello = Tello()
+# 연결
+tello.connect()
+print("연결 완료")
+# 초기 세팅
+tello.for_back_velocity = 0
+tello.left_right_velocity = 0
+tello.up_down_velocity = 0
+tello.yaw_velocity = 0
+tello.speed = 0
+# 배터리 출력
+print(f'남은 배터리 : {tello.get_battery()}')
+
+# stream 끔
+tello.streamoff()
 # tello.send_rc_control(0, 0, 0, 0)
-# # stream 킴
-# tello.streamon()
+# stream 킴
+tello.streamon()
 # tello.send_rc_control(0, 0, 0, 0)
-# # 이륙
-# tello.takeoff()
-# time.sleep(2)
-# # 도형들이 위치한 높이까지 올라간다.
-# tello.move_up(30)
-#
-# # 오름차순 정렬
-# result = match_color_and_number(tello, brightness=30)
+# 이륙
+tello.takeoff()
+print('이륙')
+time.sleep(2)
+# 도형들이 위치한 높이까지 올라간다.
+tello.move_up(30)
+print('위로 이동')
+time.sleep(2)
+
+# 오름차순 정렬
+result = match_color_and_number(tello, brightness=30)
+move_until_find_figure(tello, result[2][1], Figure.ANY, Direction.CLOCKWISE, brightness=30)
+tello_detection_figure(tello, result[2][1], Figure.ANY, brightness=30, save=True)
+tello.land()
+print(result)
+
 #
 # # 순서대로 미션 진행
 # for i, color in enumerate(Color):
@@ -316,7 +342,7 @@ def match_color_and_number(tello, brightness=0):
 #     # 다시 숫자 쪽을 바라보도록 회전
 #     tello.rotate_clockwise(180)
 #
-#
-#
-#
-#
+
+
+
+

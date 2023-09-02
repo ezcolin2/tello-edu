@@ -28,9 +28,10 @@ class Direction(Enum):
     CLOCKWISE = 6
     COUNTERCLOCKWISE = 7
 # h_min, s_min, v_min, h_max, s_max, v_max 순서
-red = [0, 86, 0, 10, 255, 255]  # 빨강
-green = [42, 99, 0, 67, 255, 255]  # 초록
-blue = [113, 60, 0, 123, 255, 255]  # 파랑
+red = [0, 50, 0, 10, 255, 230]  # 빨강
+# green = [42, 99, 0, 67, 255, 255]  # 초록
+green = [35, 49, 0, 87, 255, 255]  # 초록
+blue = [85, 50, 0, 126, 255, 255]  # 파랑
 # black = [0, 0, 0, 100, 88, 58] # 검정
 myColors = [
     red,

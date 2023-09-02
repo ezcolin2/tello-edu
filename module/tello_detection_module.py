@@ -1,6 +1,6 @@
 from module.image_processing_module import *
 from module.tello_tracking_module import *
-def tello_detection_figure(tello, color, figure, brightness=0, save=False, print=False):
+def tello_detection_figure(tello, color, figure, brightness=0, save=False, console=False):
     """
     인자로 들어온 색과 모양으로 해당 도형을 감지 여부 반환
     :param tello : Tello
@@ -41,7 +41,7 @@ def tello_detection_figure(tello, color, figure, brightness=0, save=False, print
             if save:
                 cv2.imwrite(f"images/{image_name}.png", img)
 
-            if print:
+            if console:
                 # 터미널에 front, back 출력
                 if figure == Figure.CIRCLE:
                     print('Front')
@@ -131,6 +131,8 @@ def tello_detection_number(tello, brightness=0):
             break
     cv2.destroyAllWindows()
     tello.send_rc_control(0, 0, 0, 0)
+
+
 def move_until_find_figure(tello, color, figure, direction, brightness=0):
     """
     원하는 색상의 도형을 찾을 때까지 회전
@@ -146,7 +148,8 @@ def move_until_find_figure(tello, color, figure, direction, brightness=0):
         velocity = [0, 0, 0, 0] # send_rc_control의 인자로 들어갈 값.
         frame_read = tello.get_frame_read()
         myFrame = frame_read.frame
-        img = cv2.resize(myFrame+brightness, (cam_width, cam_height))
+        img = cv2.resize(myFrame, (cam_width, cam_height))
+        img+=30
         cv2.imshow("asdf", img)
         contour_info, figureType = find_color(img, color, figure)
         x, y, w, h = contour_info
@@ -168,6 +171,8 @@ def move_until_find_figure(tello, color, figure, direction, brightness=0):
         tello.send_rc_control(*velocity)
     tello.send_rc_control(0, 0, 0, 0)
     cv2.destroyAllWindows()
+
+
 def move_until_find_qr(tello, direction, brightness=0):
     """
     원하는 색상의 도형을 찾을 때까지 회전
