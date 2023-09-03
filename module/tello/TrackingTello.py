@@ -92,7 +92,15 @@ class TrackingTello:
                 speed = 0
                 error = 0
             # print(f'fb : {fb} ud : {ud} speed : {speed}')
-            self.tello.send_rc_control(speed, fb, ud, -speed)
+            temp_speed = 20
+
+            # 왼쪽에 존재하고 치우쳐 있다면 왼쪽 회전
+            if x+w//2<0.45*cam_width:
+                temp_speed=-temp_speed
+            else:
+                temp_speed = temp_speed
+
+            self.tello.send_rc_control(temp_speed, -20, ud, -temp_speed)
             return False, error
 
         # 가로세로비가 적절하다면 정면을 보고 있다는 것
@@ -130,6 +138,9 @@ class TrackingTello:
                 error = 0
             self.tello.send_rc_control(0, fb, ud, speed)
             return False, error
+
+    # def is_side(self, img):
+
 
     # def track_number(tello, contour_info, pid, p_error, same_ratio=True):
     #     """
