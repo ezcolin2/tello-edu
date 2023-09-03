@@ -16,16 +16,14 @@ class QRDetectionTello:
             tello: Tello,
             cam_params: CamParams,
             range_params: RangeParams,
-            tracking_tello: TrackingTello,
-            figure_handler: FigureHandler,
-            qr_handler: QRHandler
+            pid_params: PIDParams
     ):
         self.tello: Tello = tello
         self.cam_params: CamParams = cam_params
         self.range_params: RangeParams = range_params
-        self.tracking_tello: TrackingTello = tracking_tello
-        self.figure_handler: FigureHandler = figure_handler
-        self.qr_handler: QRHandler = qr_handler
+        self.tracking_tello: TrackingTello = TrackingTello(self.tello, range_params, pid_params, cam_params)
+        self.figure_handler: FigureHandler = FigureHandler()
+        self.qr_handler: QRHandler = QRHandler()
 
 
 

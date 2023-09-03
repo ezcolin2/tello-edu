@@ -1,6 +1,6 @@
 import time
 from module.params import *
-from module.tello_detection_module import *
+import cv2
 from djitellopy import Tello
 import logging
 tello = Tello()
@@ -23,11 +23,13 @@ tello.send_rc_control(0, 0, 0, 0)
 # stream 킴
 tello.streamon()
 tello.send_rc_control(0, 0, 0, 0)
-
+cam_width = 640
+cam_height = 480
 while True:
     frame_read = tello.get_frame_read()
     myFrame = frame_read.frame
     img = cv2.resize(myFrame + 30, (cam_width, cam_height))
     cv2.imshow("abc", img)
+    cv2.imshow("abcd", img)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break

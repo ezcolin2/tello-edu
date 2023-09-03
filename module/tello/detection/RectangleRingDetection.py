@@ -8,8 +8,7 @@ from module.params.RangeParams import RangeParams
 from module.params.CamParams import CamParams
 from module.tello.TrackingTello import TrackingTello
 from module.handler.FigureHandler import FigureHandler
-class FigureDetectionTello:
-
+class RectangleRingDetection:
     def __init__(
             self,
             tello: Tello,
@@ -24,7 +23,7 @@ class FigureDetectionTello:
         self.tracking_tello: TrackingTello = TrackingTello(tello, range_params, pid_params, cam_params)
         self.figure_handler: FigureHandler = FigureHandler()
 
-    def tello_detection_figure(self, color, figure, brightness=0, save=False, console=False):
+    def tello_detection_rectangle_ring(self, color, figure, brightness=0, save=False, console=False):
         """
         도형을 가운데로 맞춤
         :param color : 색상
@@ -43,10 +42,18 @@ class FigureDetectionTello:
             frame_read = self.tello.get_frame_read()
             my_frame = frame_read.frame
             img = cv2.resize(my_frame + brightness, (cam_width, cam_height))
+            approx_list = self.figure_handler.find_color_with_all_contour(img ,color, figure, 10000)
+            if approx_list:
+                print(approx_list[0][0])
+                for approx in approx_list:
+                    for i in approx:
+                        cv2.circle(img, i[0], 10, (255, 0, 0), thickness=2)
+                    # x, y, w, h = cv2.boundingRect(approx)
+                    # cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 0), thickness=2)
             contour_info, figure_type = self.figure_handler.find_color(img, color, figure)
 
             # 객체 가운데로
-            success, p_error = self.tracking_tello.track_figure(contour_info, p_error)
+            success, p_error = self.tracking_tello.track_figure(contour_info, p_error, same_ratio=True)
 
             # 가운데로 왔고 저장을 하고 싶다면 이미지 저장
             if success and save:
@@ -80,7 +87,7 @@ class FigureDetectionTello:
                 break
         cv2.destroyAllWindows()
 
-    def move_until_find_figure(self, color, figure, direction, brightness=0):
+    def move_until_find_rectangle_ring(self, color, figure, direction, brightness=0):
         """
         원하는 색상의 도형을 찾을 때까지 회전
         :param color: Color enum 타입
@@ -97,13 +104,15 @@ class FigureDetectionTello:
             velocity = [0, 0, 0, 0]  # send_rc_control의 인자로 들어갈 값.
             frame_read = self.tello.get_frame_read()
             my_frame = frame_read.frame
-            img = cv2.resize(my_frame+brightness, (cam_width, cam_height))
+            img = cv2.resize(my_frame + brightness, (cam_width, cam_height))
             cv2.imshow("asdf", img)
             contour_info, figureType = self.figure_handler.find_color(img, color, figure)
             x, y, w, h = contour_info
             if (
-                    cam_width * (0.5 - self.range_params.find_range_percentage) <= x + w // 2 <= cam_width * (0.5 + self.range_params.find_range_percentage)
-                    and cam_height * (0.5 - self.range_params.find_range_percentage) <= y + h // 2 <= cam_height * (0.5 + self.range_params.find_range_percentage)
+                    cam_width * (0.5 - self.range_params.find_range_percentage) <= x + w // 2 <= cam_width * (
+                    0.5 + self.range_params.find_range_percentage)
+                    and cam_height * (0.5 - self.range_params.find_range_percentage) <= y + h // 2 <= cam_height * (
+                    0.5 + self.range_params.find_range_percentage)
                     and figureType >= 0
                     and w * h > self.range_params.min_area
             ):

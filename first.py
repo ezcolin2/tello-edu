@@ -1,12 +1,24 @@
-from module.tello_detection_module import *
-from module.params import *
+import logging
 import time
 from djitellopy import Tello
-import logging
+from module.enum.Color import *
+from module.enum.Direction import *
+from module.enum.Figure import *
+from module.params.PIDParams import PIDParams
+from module.params.RangeParams import RangeParams
+from module.params.CamParams import CamParams
+from module.tello.detection.FigureDetectionTello import FigureDetectionTello
+from module.tello.detection.QRDetectionTello import QRDetectionTello
+cam_params = CamParams(640, 480)
+pid_params = PIDParams([0.1, 0.1, 0])
+range_params = RangeParams([6000, 10000], [0.4 * cam_params.width, 0.6 * cam_params.height], 3000, 0.3, 0.1, 0.3)
+
+
 logging.getLogger('djitellopy').setLevel(logging.WARNING)
 
 tello = Tello()
-decoder = cv2.QRCodeDetector()
+figure_detection = FigureDetectionTello(tello, cam_params, pid_params, range_params)
+qr_detection = QRDetectionTello(tello, cam_params, range_params, pid_params)
 # 연결
 tello.connect()
 # 초기 세팅
@@ -45,22 +57,22 @@ def mission(tello, color, figure):
     :return:
     """
     # 원하는 도형을 발견할 때까지 회전
-    move_until_find_figure(tello, color, figure, Direction.COUNTERCLOCKWISE)
+    figure_detection.move_until_find_figure(color, figure, Direction.COUNTERCLOCKWISE, brightness=30)
 
     # 도형이 중간에 오도록 드론을 이동시킨 후 contour를 그려서 사진 촬영
-    tello_detection_figure(tello, color, figure)
+    figure_detection.tello_detection_figure(color, figure, brightness=30)
 
     # 도형이 원 일때만 qr 감지
     # qr이 잘 보이도록 아래로 조금 가서 qr 인식
     if figure == Figure.CIRCLE:
-        move_until_find_qr(tello, Direction.DOWN)
+        qr_detection.move_until_find_qr(Direction.DOWN, brightness=30)
         time.sleep(1)
-        tello_detection_qr(tello)
+        qr_detection.tello_detection_qr(brightness=30)
 
         # 도형들이 있는 높이로 이동
         # tello.move_back(60)
         time.sleep(1)
-        move_until_find_figure(tello, color, figure, Direction.UP)
+        figure_detection.move_until_find_figure(color, figure, Direction.UP, brightness=30)
         time.sleep(1)
 """
     Flag 1 수행

@@ -8,7 +8,7 @@ class Color(Enum):
 
 
 # h_min, s_min, v_min, h_max, s_max, v_max 순서
-red = [0, 50, 0, 10, 255, 230]  # 빨강
+red = [0, 155, 75, 10, 255, 255]  # 빨강
 green = [35, 49, 0, 87, 255, 255]  # 초록
 blue = [85, 50, 0, 126, 255, 255]  # 파랑
 myColors = [

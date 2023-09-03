@@ -51,7 +51,7 @@ class TrackingTello:
         cam_width = self.cam_params.width
         cam_height = self.cam_params.height
         aspect_ratio = 0
-
+        print(f"perror : {p_error}")
         if w != 0 and h != 0:
             aspect_ratio = w / h  # 가로세로비
 
