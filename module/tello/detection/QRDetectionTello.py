@@ -50,7 +50,7 @@ class QRDetectionTello:
                 print(barcode.data.decode('utf-8'))
                 break
             # 객체 가운데로
-            success, p_error = self.tracking_tello.track_figure(self.tello, contour_info, pid, p_error)
+            success, p_error = self.tracking_tello.track_figure_with_rotate(self.tello, contour_info, pid, p_error)
             if success:
                 barcode_info = barcode.data.decode('utf-8')
                 print(barcode_info)

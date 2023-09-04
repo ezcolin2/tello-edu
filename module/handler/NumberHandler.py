@@ -80,6 +80,8 @@ class NumberHandler:
 
         kernel = np.ones((3, 3))
         result = -1
+
+        # 색 찾기
         contour_info, _ = self.figure_handler.find_color(img, color, Figure.RECTANGLE)
         x, y, w, h = contour_info
         if rectangle_contour:
@@ -88,6 +90,8 @@ class NumberHandler:
             # for x, y, w, h in coord_list:
             #     cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 0), 2)
 
+        # 숫자 찾기
+        # 정확도를 위해 색 제거
         temp = self.delete_color(img)
         temp = cv2.cvtColor(temp, cv2.COLOR_BGR2GRAY)
 

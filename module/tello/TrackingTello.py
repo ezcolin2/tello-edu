@@ -30,7 +30,7 @@ class TrackingTello:
             raise AttributeError(f"'FigureHandler' object has no attribute '{name}'")
 
 
-    def track_figure(
+    def track_figure_with_rotate(
             self,
             contour_info,
             p_error,
@@ -139,6 +139,108 @@ class TrackingTello:
             self.tello.send_rc_control(0, fb, ud, speed)
             return False, error
 
+    def track_figure_with_no_rotate(
+            self,
+            contour_info,
+            p_error_lr,
+            p_error_ud
+    ):
+
+        """
+        객체가 가운데에 올 수 있게끔 조절하는 함수.
+        PID를 통해 오차를 계산해서 객체가 중간에 있는지를 알려주는 boolean 값과 오차값 반환.
+        :param contour_info : (x, y, w, h)
+        :param p_error_lr : 좌우 이전 오차 값
+        :param p_error_ud : 위아래 이전 오차 값
+        :return : 객체 중간 여부, lr 오차값, ud 오차값
+        """
+        # pid 적용
+        x, y, w, h = contour_info
+        p, i, d = self.pid_params.pid_value
+        cam_width = self.cam_params.width
+        cam_height = self.cam_params.height
+        aspect_ratio = 0
+
+        # left, right 속도 구하기
+        print(f"p_error_lr : {p_error_lr}")
+
+        # contour 중심과 이미지 중심 좌표의 차이
+        error_lr = x + w // 2 - cam_width // 2
+        speed_lr = p * error_lr + i * (error_lr - p_error_lr)
+        speed_lr = int(np.clip(speed_lr, -100, 100))
+
+        # up, down 속도 구하기
+        print(f"p_error_ud : {p_error_ud}")
+
+        # contour 중심과 이미지 중심 좌표의 차이
+        error_ud = y + h // 2 - cam_height // 2
+        speed_ud = p * error_ud + i * (error_ud - p_error_ud)
+        speed_ud = int(np.clip(speed_ud, -100, 100))
+        fb = 0
+        ud = 0
+        area = w * h
+        if self.range_params.fb_range[0] <= area <= self.range_params.fb_range[1]:  # 적당하다면 멈춤
+            fb = 0
+            if (
+                    cam_width * (0.5 - self.range_params.center_range_percentage) <= x + w // 2 <= cam_width * (0.5 + self.range_params.center_range_percentage)
+                    and cam_height * (0.5 - self.range_params.center_range_percentage) <= y + h // 2 <= cam_height * (0.5 + self.range_params.center_range_percentage)
+            ):
+                # if speed==0:
+                return True, error_lr, error_ud
+        elif area > self.range_params.fb_range[1]:  # 너무 가깝다면 뒤로
+            fb = -10
+        elif area < self.range_params.fb_range[0] and area != 0:  # 너무 멀다면 앞으로
+            fb = 10
+
+        if x == 0:
+            speed_lr = 0
+            error_lr = 0
+        if y == 0:
+            speed_ud = 0
+            error_ud = 0
+        self.tello.send_rc_control(speed_lr, fb, speed_ud, 0)
+        return False, error_lr, error_ud
+
+    def track_figure_until_not_find(
+            self,
+            contour_info,
+            p_error,
+    ):
+        # pid 적용
+        x, y, w, h = contour_info
+        p, i, d = self.pid_params.pid_value
+        cam_width = self.cam_params.width
+        cam_height = self.cam_params.height
+        aspect_ratio = 0
+        # contour 중심과 이미지 중심 좌표의 차이
+        error = x + w // 2 - cam_width // 2
+        speed = p * error + i * (error - p_error)
+        speed = int(np.clip(speed, -100, 100))
+        fb = 0
+        ud = 0
+        area = w * h
+        if self.range_params.fb_range[0] <= area <= self.range_params.fb_range[1]:  # 적당하다면 멈춤
+            fb = 0
+            if (
+                    x==0 and y==0 and w==0 and h==0
+                    # cam_width * (0.5 - self.range_params.center_range_percentage) <= x + w // 2 <= cam_width * (0.5 + self.range_params.center_range_percentage)
+                    # and cam_height * (0.5 - self.range_params.center_range_percentage) <= y + h // 2 <= cam_height * (0.5 + self.range_params.center_range_percentage)
+            ):
+                # if speed==0:
+                return True, error
+
+        if self.range_params.ud_range[0] <= y + h // 2 <= self.range_params.ud_range[1]:
+            ud = 0
+        elif y + h // 2 > self.range_params.ud_range[1]:  # 너무 아래라면 위로
+            ud = -20
+        elif y + h // 2 < self.range_params.ud_range[0]:  # 너무 아래라면 위로
+            ud = 20
+
+        if x == 0:
+            speed = 0
+            error = 0
+        self.tello.send_rc_control(0, 10, ud, speed)
+        return False, error
     # def is_side(self, img):
 
 

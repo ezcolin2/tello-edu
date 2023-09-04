@@ -46,7 +46,7 @@ class FigureDetectionTello:
             contour_info, figure_type = self.figure_handler.find_color(img, color, figure)
 
             # 객체 가운데로
-            success, p_error = self.tracking_tello.track_figure(contour_info, p_error)
+            success, p_error = self.tracking_tello.track_figure_with_rotate(contour_info, p_error)
 
             # 가운데로 왔고 저장을 하고 싶다면 이미지 저장
             if success and save:
