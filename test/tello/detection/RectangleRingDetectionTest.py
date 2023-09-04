@@ -1,26 +1,28 @@
-import cv2
-from module.enum.Color import *
-from module.params.PIDParams import PIDParams
-from module.params.RangeParams import RangeParams
-from module.params.CamParams import CamParams
-from module.handler.ImageHandler import ImageHandler
-from module.handler.FigureHandler import FigureHandler
-from module.handler.NumberHandler import NumberHandler
-from module.ai_model.NumberModel import NumberModel
-from module.tello.detection.FigureDetectionTello import FigureDetectionTello
-from module.tello.detection.RectangleRingDetection import RectangleRingDetection
-from module.enum.Color import *
-from module.enum.Direction import *
-from module.enum.Figure import *
-import torch
-import numpy as np
+from main.module.ai_model.NumberModel import *
+import time
+from main.module.params.PIDParams import PIDParams
+from main.module.params.RangeParams import RangeParams
+from main.module.params.CamParams import CamParams
+from main.module.tello.detection.RectangleRingDetection import RectangleRingDetection
+from main.module.enum.Color import *
+from main.module.enum.Direction import *
+from main.module.enum.Figure import *
+from main.module.handler.NumberHandler import NumberHandler
 import logging
 from djitellopy import Tello
-import time
 
+# 로그 설정
 logging.getLogger('djitellopy').setLevel(logging.WARNING)
 
+# Tello 객체 생성
 tello = Tello()
+
+# 숫자 인식 모델 생성
+model = NumberModel()  # 모델 클래스 정의로 변경
+model.load_state_dict(torch.load("../../../main/module/ai_model/cnn_model.pth"))
+model.eval()  # 모델을 평가 모드로 설정
+
+# img+=30
 # 연결
 tello.connect()
 # 초기 세팅
@@ -44,8 +46,11 @@ tello.takeoff()
 tello.move_up(50)
 cam_params = CamParams(640, 480)
 pid_params = PIDParams([0.1, 0.1, 0])
-range_params = RangeParams([100000, 150000], [0.45 * cam_params.width, 0.55 * cam_params.height], 3000, 0.01, 0.01, 0.3)
+range_params = RangeParams([150000, 200000], [0.45 * cam_params.width, 0.55 * cam_params.height], 3000, 0.1, 0.01, 0.3)
+number_handler = NumberHandler(model)
+
+rectangle_ring_detection = RectangleRingDetection(tello, cam_params, pid_params, range_params, number_handler)
 # 원하는 색상 도형 찾아서 가운데로
-rectangle_ring_detection = RectangleRingDetection(tello, cam_params, pid_params, range_params)
-rectangle_ring_detection.move_until_find_rectangle_ring(Color.BLUE, Figure.RECTANGLE, Direction.RIGHT, brightness=30)
-rectangle_ring_detection.tello_detection_rectangle_ring_with_no_rotate(Color.BLUE, Figure.RECTANGLE, brightness=30)
+rectangle_ring_detection.move_until_find_figure(Color.BLUE, Figure.RECTANGLE, Direction.RIGHT, brightness=30)
+rectangle_ring_detection.tello_detection_rectangle_ring_with_no_rotate(Color.BLUE, Figure.RECTANGLE, brightness=30, save=False)
+tello.land()

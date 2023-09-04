@@ -1,5 +1,5 @@
-from module.handler.NumberHandler import NumberHandler
-from module.ai_model.NumberModel import NumberModel
+from main.module.handler.NumberHandler import NumberHandler
+from main.module.ai_model.NumberModel import NumberModel
 import torch
 import cv2
 import numpy as np
@@ -34,7 +34,7 @@ def stackImages(scale,imgArray):
         ver = hor
     return ver
 model = NumberModel()  # 모델 클래스 정의로 변경
-model.load_state_dict(torch.load("../../module/ai_model/cnn_model.pth"))
+model.load_state_dict(torch.load("../../main/module/ai_model/cnn_model.pth"))
 model.eval()  # 모델을 평가 모드로 설정
 
 # NumberHandler 인스턴스 생성
