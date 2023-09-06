@@ -53,3 +53,57 @@ class NumberModel(nn.Module):
             outputs = self.model(image)
             _, predicted = torch.max(outputs, 1)
         return predicted.item()
+    # def __init__(self) -> None:
+    #     super(NumberModel, self).__init__()
+    #     self.relu = nn.ReLU()
+    #
+    #     self.fc1 = nn.Linear(1 * 28 * 28, 100)
+    #     self.fc2 = nn.Linear(100, 10)
+    #
+    # def forward(self, x):
+    #     x = x.view(x.size(0), -1)
+    #     x = self.relu(self.fc1(x))
+    #     x = self.fc2(x)
+    #
+    #     return x
+    # def get_number_with_model(self, image):
+    #     """
+    #     이진화 처리 된 이미지를 받아서 해당 숫자 판단
+    #     :param image: 이진화 된 이미지
+    #     :return: 감지한 숫자
+    #     """
+    #
+    #     """
+    #     숫자인지 아닌지 판단하는 함수.
+    #     Args:
+    #         img (numpy.ndarray): Binary mask를 이용해 binary mask를 잘라서 얻은 이미지
+    #     returns:
+    #         int: 해당 부분이 어떤 숫자인지 반환한다.
+    #     """
+    #     global model
+    #     with torch.no_grad():
+    #         img = self._convert(image, keepdim=False)
+    #         img = img.to(self.device)
+    #
+    #         label = self.model(img).max(dim=1)[1].item()
+    #
+    #     return label
+    # def _convert(self, img, keepdim = True):
+    #     """
+    #     이미지를 neural network 모델의 입력값의 형식으로 바꾼다.
+    #     Args:
+    #         img (numpy.ndarray): 원하는 이미지의 전체 혹은 부분
+    #         keep
+    #     """
+    #     img = torch.from_numpy(img)
+    #     if keepdim:
+    #         img = img / 255
+    #         img = img.permute(2, 0, 1)
+    #         img = self.resize(img, (28, 28))
+    #
+    #     else:
+    #         img = img / 255
+    #         img = img.unsqueeze(0)
+    #         img = self.resize(img, (28, 28))
+    #     img = img.unsqueeze(0)
+    #     return img

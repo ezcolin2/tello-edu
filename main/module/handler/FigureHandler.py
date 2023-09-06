@@ -3,7 +3,6 @@ import numpy as np
 from main.module.enum.Color import *
 from main.module.enum.Figure import *
 from main.module.handler.ImageHandler import ImageHandler
-
 class FigureHandler:
     def __init__(self):
         self.image_handler = ImageHandler()
@@ -19,6 +18,11 @@ class FigureHandler:
 
         # 이거는 BGR2HSV 사용해야 함.
         # HSV로 변환하면 grayscale로 바꿔주고 채널이 하나.
+
+        # 빨간색이 감지가 잘 안 돼서 빨간색 감지할 때는 초록, 파랑색을 없앰
+        if color == Color.RED:
+            img = self.image_handler.delete_specific_color(img, Color.BLUE)
+            img = self.image_handler.delete_specific_color(img, Color.GREEN)
 
         imgHSV = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
         lower = np.array([myColors[color.value][0:3]])
@@ -44,6 +48,12 @@ class FigureHandler:
 
         # 이거는 BGR2HSV 사용해야 함.
         # HSV로 변환하면 grayscale로 바꿔주고 채널이 하나.
+
+        # 빨간색이 감지가 잘 안 돼서 빨간색 감지할 때는 초록, 파랑색을 없앰
+        if color == Color.RED:
+            img = self.image_handler.delete_specific_color(img, Color.BLUE)
+            img = self.image_handler.delete_specific_color(img, Color.GREEN)
+
         imgHSV = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
         lower = np.array([myColors[color.value][0:3]])
         upper = np.array([myColors[color.value][3:6]])

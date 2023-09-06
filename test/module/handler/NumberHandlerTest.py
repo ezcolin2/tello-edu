@@ -3,6 +3,7 @@ from main.module.ai_model.NumberModel import NumberModel
 import torch
 import cv2
 import numpy as np
+from main.module.enum.Color import Color
 def stackImages(scale,imgArray):
     rows = len(imgArray)
     cols = len(imgArray[0])
@@ -34,7 +35,7 @@ def stackImages(scale,imgArray):
         ver = hor
     return ver
 model = NumberModel()  # 모델 클래스 정의로 변경
-model.load_state_dict(torch.load("../../main/module/ai_model/cnn_model.pth"))
+model.load_state_dict(torch.load("../../../main/module/ai_model/cnn_model.pth"))
 model.eval()  # 모델을 평가 모드로 설정
 
 # NumberHandler 인스턴스 생성
@@ -80,7 +81,16 @@ result = number_handler.find_all_numbers(three_six_nine, 500)
 for (x, y, w, h), predicted in result:
     cv2.rectangle(three_six_nine, (x, y), (x+w, y+h), (255, 0, 0), 2)
     cv2.putText(three_six_nine, str(predicted), (x + w // 2, y - 20), cv2.FONT_ITALIC, 1, (0, 0, 0),thickness=3)
+
+three_six_nine_only_red = cv2.imread("images/3_6_9.png")
+
+three_six_nine_only_red = number_handler.delete_specific_color(three_six_nine_only_red, Color.BLUE)
+three_six_nine_only_red = number_handler.delete_specific_color(three_six_nine_only_red, Color.GREEN)
+result = number_handler.find_all_numbers(three_six_nine_only_red, 500)
+for (x, y, w, h), predicted in result:
+    cv2.rectangle(three_six_nine_only_red, (x, y), (x+w, y+h), (255, 0, 0), 2)
+    cv2.putText(three_six_nine_only_red, str(predicted), (x + w // 2, y - 20), cv2.FONT_ITALIC, 1, (0, 0, 0),thickness=3)
 # 여러 숫자 이미지
-stacked_img = stackImages(0.6, ([[one_img, one_img_big, numbers], [one_seven_nine, seven_nine, three_six_nine]]))
+stacked_img = stackImages(0.6, ([[one_img, one_img_big, numbers], [one_seven_nine, seven_nine, three_six_nine_only_red]]))
 cv2.imshow("stack", stacked_img)
 cv2.waitKey()

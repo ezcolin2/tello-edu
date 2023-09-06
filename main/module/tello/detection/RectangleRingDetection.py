@@ -106,25 +106,29 @@ class RectangleRingDetection:
         print('도형 감지 시작')
         p_error_lr = 0
         p_error_ud = 0
+        p_error_fb = 0
         cam_width = self.cam_params.width
         cam_height = self.cam_params.height
-        pid = self.pid_params.pid_value
         while True:
             frame_read = self.tello.get_frame_read()
             my_frame = frame_read.frame
             img = cv2.resize(my_frame + brightness, (cam_width, cam_height))
             approx_list = self.figure_handler.find_color_with_all_contour(img, color, figure, 10000)
             if approx_list:
-                print(approx_list[0][0])
                 for approx in approx_list:
                     for i in approx:
                         cv2.circle(img, i[0], 10, (255, 0, 0), thickness=2)
                     # x, y, w, h = cv2.boundingRect(approx)
                     # cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 0), thickness=2)
             contour_info, figure_type = self.figure_handler.find_color(img, color, figure)
+            x, y, w, h = contour_info
 
+            # 너무 가까이 가면 contour를 감지 못 하기 때문에 뒤로 이동
+            if x==0 and y==0 and w==0 and h==0:
+                self.tello.move_back(30)
+                continue
             # 객체 가운데로
-            success, p_error_lr, p_error_ud = self.tracking_tello.track_figure_with_no_rotate(contour_info, p_error_lr, p_error_ud)
+            success, p_error_lr, p_error_ud, p_error_fb = self.tracking_tello.track_figure_with_no_rotate(contour_info, p_error_lr, p_error_ud, p_error_fb)
 
             # 가운데로 왔고 저장을 하고 싶다면 이미지 저장
             if success and save:
@@ -132,18 +136,14 @@ class RectangleRingDetection:
 
                 image_name = ""  # 저장할 이미지 이름
                 if color == Color.RED:
-                    image_name += "red"
+                    image_name += "Red"
                 elif color == Color.GREEN:
-                    image_name += "green"
+                    image_name += "Green"
                 elif color == Color.BLUE:
-                    image_name += "blue"
-                if figure == Figure.TRI:
-                    image_name += " triangle"
-                elif figure == Figure.CIRCLE:
-                    image_name += " circle"
+                    image_name += "Blue"
 
                 if save:
-                    cv2.imwrite(f"images/{image_name}.png", img)
+                    cv2.imwrite(f"second_result/{image_name}.png", img)
 
                 if console:
                     # 터미널에 front, back 출력
@@ -152,12 +152,13 @@ class RectangleRingDetection:
                     elif figure == Figure.TRI:
                         print('Back')
                     break
-                print('도형 감지 성공')
+
+                print(f'도형 감지 성공 : {image_name}')
+
                 break
             # q를 누르면 무한 반복에서 빠져나옴
             elif success:
-                print('현재 중심에 있습니다.')
-                # break
+                break
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
         cv2.destroyAllWindows()

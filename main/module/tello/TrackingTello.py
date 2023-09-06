@@ -139,7 +139,8 @@ class TrackingTello:
             self,
             contour_info,
             p_error_lr,
-            p_error_ud
+            p_error_ud,
+            p_error_fb
     ):
 
         """
@@ -152,48 +153,59 @@ class TrackingTello:
         """
         # pid 적용
         x, y, w, h = contour_info
-        p, i, d = self.pid_params.pid_value
+
+        p_lr, i_lr, d_lr = self.pid_params.pid_value_lr
+        p_ud, i_ud, d_ud = self.pid_params.pid_value_ud
+        p_fb, i_fb, d_fb = self.pid_params.pid_value_fb
         cam_width = self.cam_params.width
         cam_height = self.cam_params.height
 
-        # left, right 속도 구하기
-        print(f"p_error_lr : {p_error_lr}")
 
         # contour 중심과 이미지 중심 좌표의 차이
         error_lr = x + w // 2 - cam_width // 2
-        speed_lr = p * error_lr + i * (error_lr - p_error_lr)
+        speed_lr = p_lr * error_lr + i_lr * (error_lr - p_error_lr)
         speed_lr = int(np.clip(speed_lr, -100, 100))
 
-        # up, down 속도 구하기
-        print(f"p_error_ud : {p_error_ud}")
 
         # contour 중심과 이미지 중심 좌표의 차이
         error_ud = y + h // 2 - cam_height // 2
-        speed_ud = p * error_ud + i * (error_ud - p_error_ud)
+        speed_ud = p_ud * error_ud + i_ud * (error_ud - p_error_ud)
         speed_ud = int(np.clip(speed_ud, -100, 100))
-        fb = 0
-        area = w * h
-        if self.range_params.fb_range[0] <= area <= self.range_params.fb_range[1]:  # 적당하다면 멈춤
-            fb = 0
-            # 이미지의 width, height가 다르기 때문에 center_range_percentage를 조정함
-            if (
-                    cam_width * (0.5 - self.range_params.center_range_percentage) <= x + w // 2 <= cam_width * (0.5 + self.range_params.center_range_percentage*0.5)
-                    and cam_height * (0.5 - self.range_params.center_range_percentage) <= y + h // 2 <= cam_height * (0.5 + self.range_params.center_range_percentage*0.5)
-            ):
-                # if speed==0:
-                return True, error_lr, error_ud
-        elif area > self.range_params.fb_range[1]:  # 너무 가깝다면 뒤로
-            fb = -10
-        elif area < self.range_params.fb_range[0] and area != 0:  # 너무 멀다면 앞으로
-            fb = 10
 
-        # if x == 0 and y == 0 and w == 0 and h == 0:
-        #     speed_lr = 0
-        #     error_lr = 0
-        #     speed_ud = 0
-        #     error_ud = 0
-        self.tello.send_rc_control(speed_lr, fb, -int(speed_ud*1.3), 0)
-        return False, error_lr, error_ud
+        # contour 넓이와 원하는 넓이의 차이
+        error_fb = w * h - (self.range_params.fb_range[0] + self.range_params.fb_range[1])//2
+        speed_fb = p_fb * error_fb + i_fb * (error_fb - p_error_fb)
+        speed_fb = int(np.clip(speed_fb, -100, 100))
+
+        area = w * h
+
+
+
+            # fb = 0
+            # 이미지의 width, height가 다르기 때문에 center_range_percentage를 조정함
+        if (
+                self.range_params.fb_range[0] <= w * h <= self.range_params.fb_range[1]
+                and cam_width * (0.5 - self.range_params.center_range_percentage) <= x + w // 2 <= cam_width * (0.5 + self.range_params.center_range_percentage)
+                and cam_height * (0.5 - self.range_params.center_range_percentage*2) <= y + h // 2 <= cam_height * (0.5 + self.range_params.center_range_percentage*2)
+        ):
+            # if speed==0:
+            return True, error_lr, error_ud, error_fb
+        # elif area > self.range_params.fb_range[1]:  # 너무 가깝다면 뒤로
+        #     fb = -10
+        # elif area < self.range_params.fb_range[0] and area != 0:  # 너무 멀다면 앞으로
+        #     fb = 10
+
+        # 벗어나면 멈춤
+        if x == 0 and y == 0 and w == 0 and h == 0:
+            speed_lr = 0
+            error_lr = 0
+            speed_ud = 0
+            error_ud = 0
+            speed_fb = 0
+            error_fb = 0
+        self.tello.send_rc_control(speed_lr, -speed_fb, -speed_ud, 0)
+        return False, error_lr, error_ud, error_fb
+
 
     def track_figure_until_not_find(
             self,

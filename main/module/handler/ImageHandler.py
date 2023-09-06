@@ -64,6 +64,37 @@ class ImageHandler:
         # 해당 범위의 색상 전부 흰색으로 변경
         temp_img[dilated_mask > 0] = [255, 255, 255]
         return temp_img
+    def delete_specific_color(self, img, color):
+        """
+        모든 색깔을 흰색으로 칠해서 반환
+        :param img: 원본 이미지
+        :return: 색깔을 흰색으로 칠한 이미지
+        """
+        # # 색깔 밝게
+        # img+=30
+
+        # HSV 색 공간으로 변경
+        hsv_image = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+
+        # 커널
+        kernel = np.ones((5, 5), np.uint8)
+
+        # HSV 범위
+        lower_color = np.array(myColors[color.value][:3])
+        upper_color = np.array(myColors[color.value][3:])
+
+        # 마스크 생성
+        mask = cv2.inRange(hsv_image, lower_color, upper_color)
+
+        # 노이즈 제거
+        dilated_mask = cv2.dilate(mask, kernel, iterations=2)
+
+        temp_img = np.copy(img)
+
+        # 해당 범위의 색상 전부 흰색으로 변경
+        temp_img[dilated_mask > 0] = [255, 255, 255]
+        return temp_img
+
 
     def save_contours_by_color(self, img, color):
         """
