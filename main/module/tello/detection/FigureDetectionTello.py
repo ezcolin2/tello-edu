@@ -42,7 +42,7 @@ class FigureDetectionTello:
             frame_read = self.tello.get_frame_read()
             my_frame = frame_read.frame
             img = cv2.resize(my_frame + brightness, (cam_width, cam_height))
-            contour_info, figure_type = self.figure_handler.find_color(img, color, figure)
+            contour_info, figure_type = self.figure_handler.find_color(img, color, figure, 500)
 
             # 객체 가운데로
             success, p_error = self.tracking_tello.track_figure_with_rotate(contour_info, p_error)
@@ -98,7 +98,7 @@ class FigureDetectionTello:
             my_frame = frame_read.frame
             img = cv2.resize(my_frame+brightness, (cam_width, cam_height))
             cv2.imshow("asdf", img)
-            contour_info, figureType = self.figure_handler.find_color(img, color, figure)
+            contour_info, figureType = self.figure_handler.find_color(img, color, figure, 500)
             x, y, w, h = contour_info
             if (
                     cam_width * (0.5 - self.range_params.find_range_percentage) <= x + w // 2 <= cam_width * (0.5 + self.range_params.find_range_percentage)

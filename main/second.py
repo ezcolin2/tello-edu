@@ -169,11 +169,11 @@ for i in range(3):
         # 왼쪽 이동
         if location<current_location:
             # 숫자에 매치되는 색상을 찾음
-            rectangle_ring_detection.move_until_find_figure(result[i][1], Figure.ANY, Direction.LEFT, brightness=30)
+            rectangle_ring_detection.move_until_find(result[i][1], Figure.ANY, Direction.LEFT, brightness=30)
 
         # 오른쪽 이동
         else:
-            rectangle_ring_detection.move_until_find_figure(result[i][1], Figure.ANY, Direction.RIGHT, brightness=30)
+            rectangle_ring_detection.move_until_find(result[i][1], Figure.ANY, Direction.RIGHT, brightness=30)
 
 
     # 해당 위치로 이동했으면 해당 사각형 아래의 숫자 bounding rectangle 그려서 저장
@@ -211,13 +211,13 @@ for i in range(3):
         # 왼쪽 이동
         if location > current_location:
             # 숫자에 매치되는 색상을 찾음
-            rectangle_ring_detection.move_until_find_figure(color, Figure.ANY, Direction.LEFT,
-                                                            brightness=30)
+            rectangle_ring_detection.move_until_find(color, Figure.ANY, Direction.LEFT,
+                                                     brightness=30)
 
         # 오른쪽 이동
         else:
-            rectangle_ring_detection.move_until_find_figure(color, Figure.ANY, Direction.RIGHT,
-                                                            brightness=30)
+            rectangle_ring_detection.move_until_find(color, Figure.ANY, Direction.RIGHT,
+                                                     brightness=30)
     print(f'숫자 {i} 색 감지 : {Color(color.value).name}')
     # 해당 위치로 이동했으면 해당 사각형 아래의 숫자 bounding rectangle 그려서 저장
     frame_read = tello.get_frame_read()

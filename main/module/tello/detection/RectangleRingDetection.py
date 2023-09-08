@@ -53,9 +53,9 @@ class RectangleRingDetection:
                 for approx in approx_list:
                     for i in approx:
                         cv2.circle(img, i[0], 10, (255, 0, 0), thickness=2)
-                    # x, y, w, h = cv2.boundingRect(approx)
-                    # cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 0), thickness=2)
-            contour_info, figure_type = self.figure_handler.find_color(img, color, figure)
+                    x, y, w, h = cv2.boundingRect(approx)
+                    cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 0), thickness=2)
+            contour_info, figure_type = self.figure_handler.find_color(img, color, figure, 500)
 
             # 객체 가운데로
             success, p_error = self.tracking_tello.track_figure_with_rotate(contour_info, p_error, same_ratio=True)
@@ -96,6 +96,7 @@ class RectangleRingDetection:
     def tello_detection_rectangle_ring_with_no_rotate(self, color, figure, brightness=0, save=False, console=False):
         """
         도형을 가운데로 맞춤
+        감지한 링의 내접, 외접 contour를 모두 그림
         :param color : 색상
         :param figure : 도형
         :param brightness : 드론으로 찍은 사진 밝기 조절 값
@@ -109,25 +110,38 @@ class RectangleRingDetection:
         p_error_fb = 0
         cam_width = self.cam_params.width
         cam_height = self.cam_params.height
+
+        # rectangle ring의 가장 바깥쪽 contour 정보
+        x, y, w, h = 0, 0, 0, 0
         while True:
             frame_read = self.tello.get_frame_read()
             my_frame = frame_read.frame
             img = cv2.resize(my_frame + brightness, (cam_width, cam_height))
-            approx_list = self.figure_handler.find_color_with_all_contour(img, color, figure, 10000)
+            # 모든 contour를 찾고나면 이 중에서 rectangle ring을 걸러내야하기 때문에 contour를 그리지는 않는다.
+            approx_list = self.figure_handler.find_color_with_all_contour(img, color, figure, 10000, draw_contour=False)
             if approx_list:
                 for approx in approx_list:
+                    x_temp, y_temp, w_temp, h_temp = cv2.boundingRect(approx)
+
+                    # 감지한 contour 중 ring이 있다면 그 값을 저장
+                    if self.figure_handler.is_ring(color, figure, img[x_temp:x_temp+w_temp+1][y_temp:y_temp+h_temp+1]):
+                        x, y, w, h = x_temp, y_temp, w_temp, h_temp
+
+                        # rectangle ring에만 contour를 그림
+                        approx_list_ring = self.figure_handler.find_color_with_all_contour(img[x_temp:x_temp+w_temp+1][y_temp:y_temp+h_temp+1], color, figure, 10000, draw_contour=True)
+
+                        # 외접, 내접 contour도 그리기
                     for i in approx:
                         cv2.circle(img, i[0], 10, (255, 0, 0), thickness=2)
-                    # x, y, w, h = cv2.boundingRect(approx)
-                    # cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 0), thickness=2)
-            contour_info, figure_type = self.figure_handler.find_color(img, color, figure)
-            x, y, w, h = contour_info
+            # contour_info, figure_type = self.figure_handler.find_color(img, color, figure, 500)
+            # x, y, w, h = contour_info
 
             # 너무 가까이 가면 contour를 감지 못 하기 때문에 뒤로 이동
             if x==0 and y==0 and w==0 and h==0:
                 self.tello.move_back(30)
                 continue
             # 객체 가운데로
+            contour_info = (x, y, w, h)
             success, p_error_lr, p_error_ud, p_error_fb = self.tracking_tello.track_figure_with_no_rotate(contour_info, p_error_lr, p_error_ud, p_error_fb)
 
             # 가운데로 왔고 저장을 하고 싶다면 이미지 저장
@@ -162,70 +176,71 @@ class RectangleRingDetection:
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
         cv2.destroyAllWindows()
-    def go_forward_until_not_find_rectangle_ring(self, color, figure, brightness=0, save=False):
+    # def go_forward_until_not_find_rectangle_ring(self, color, figure, brightness=0, save=False):
+    #     """
+    #     도형을 가운데로 맞춤
+    #     :param color : 색상
+    #     :param figure : 도형
+    #     :param brightness : 드론으로 찍은 사진 밝기 조절 값
+    #     :param save : 사진 저장 여부
+    #     :param console : front, back 출력 여부
+    #     :return: 없음
+    #     """
+    #     print('도형 감지 시작')
+    #     p_error = 0
+    #     cam_width = self.cam_params.width
+    #     cam_height = self.cam_params.height
+    #     pid = self.pid_params.pid_value
+    #     success_cnt=0 # 성공이라고 판단할 횟수
+    #     while True:
+    #         frame_read = self.tello.get_frame_read()
+    #         my_frame = frame_read.frame
+    #         img = cv2.resize(my_frame + brightness, (cam_width, cam_height))
+    #
+    #         approx_list = self.figure_handler.find_color_with_all_contour(img ,color, figure, 10000)
+    #         if approx_list:
+    #             print(approx_list[0][0])
+    #             for approx in approx_list:
+    #                 for i in approx:
+    #                     cv2.circle(img, i[0], 10, (255, 0, 0), thickness=2)
+    #                 # x, y, w, h = cv2.boundingRect(approx)
+    #                 # cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 0), thickness=2)
+    #         contour_info, figure_type = self.figure_handler.find_color(img, color, figure, 500)
+    #
+    #         # 객체 가운데로
+    #         success, p_error = self.tracking_tello.track_figure_until_not_find(contour_info, p_error)
+    #
+    #         # 가운데로 왔고 저장을 하고 싶다면 이미지 저장
+    #         if success and save:
+    #             # 이미지 이름 정하기
+    #             if success_cnt<100:
+    #                 success_cnt+=1
+    #                 continue
+    #
+    #             image_name = ""  # 저장할 이미지 이름
+    #             if color == Color.RED:
+    #                 image_name += "red"
+    #             elif color == Color.GREEN:
+    #                 image_name += "green"
+    #             elif color == Color.BLUE:
+    #                 image_name += "blue"
+    #             if figure == Figure.TRI:
+    #                 image_name += " triangle"
+    #             elif figure == Figure.CIRCLE:
+    #                 image_name += " circle"
+    #
+    #             if save:
+    #                 cv2.imwrite(f"images/{image_name}.png", img)
+    #             print('도형 감지 성공')
+    #             break
+    #         # q를 누르면 무한 반복에서 빠져나옴
+    #         if cv2.waitKey(1) & 0xFF == ord('q'):
+    #             break
+    #     cv2.destroyAllWindows()
+
+    def move_until_find(self, color, figure, direction, brightness=0):
         """
-        도형을 가운데로 맞춤
-        :param color : 색상
-        :param figure : 도형
-        :param brightness : 드론으로 찍은 사진 밝기 조절 값
-        :param save : 사진 저장 여부
-        :param console : front, back 출력 여부
-        :return: 없음
-        """
-        print('도형 감지 시작')
-        p_error = 0
-        cam_width = self.cam_params.width
-        cam_height = self.cam_params.height
-        pid = self.pid_params.pid_value
-        success_cnt=0 # 성공이라고 판단할 횟수
-        while True:
-            frame_read = self.tello.get_frame_read()
-            my_frame = frame_read.frame
-            img = cv2.resize(my_frame + brightness, (cam_width, cam_height))
-            approx_list = self.figure_handler.find_color_with_all_contour(img ,color, figure, 10000)
-            if approx_list:
-                print(approx_list[0][0])
-                for approx in approx_list:
-                    for i in approx:
-                        cv2.circle(img, i[0], 10, (255, 0, 0), thickness=2)
-                    # x, y, w, h = cv2.boundingRect(approx)
-                    # cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 0), thickness=2)
-            contour_info, figure_type = self.figure_handler.find_color(img, color, figure)
-
-            # 객체 가운데로
-            success, p_error = self.tracking_tello.track_figure_until_not_find(contour_info, p_error)
-
-            # 가운데로 왔고 저장을 하고 싶다면 이미지 저장
-            if success and save:
-                # 이미지 이름 정하기
-                if success_cnt<100:
-                    success_cnt+=1
-                    continue
-
-                image_name = ""  # 저장할 이미지 이름
-                if color == Color.RED:
-                    image_name += "red"
-                elif color == Color.GREEN:
-                    image_name += "green"
-                elif color == Color.BLUE:
-                    image_name += "blue"
-                if figure == Figure.TRI:
-                    image_name += " triangle"
-                elif figure == Figure.CIRCLE:
-                    image_name += " circle"
-
-                if save:
-                    cv2.imwrite(f"images/{image_name}.png", img)
-                print('도형 감지 성공')
-                break
-            # q를 누르면 무한 반복에서 빠져나옴
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
-        cv2.destroyAllWindows()
-
-    def move_until_find_figure(self, color, figure, direction, brightness=0):
-        """
-        원하는 색상의 도형을 찾을 때까지 회전
+        원하는 색상의 사각형 링을 찾을 때까지 회전
         :param color: Color enum 타입
         :param figure: Figure enum 타입
         :param direction: Direction enum 타입
@@ -242,8 +257,12 @@ class RectangleRingDetection:
             my_frame = frame_read.frame
             img = cv2.resize(my_frame + brightness, (cam_width, cam_height))
             cv2.imshow("asdf", img)
-            contour_info, figureType = self.figure_handler.find_color(img, color, figure)
+            contour_info, figureType = self.figure_handler.find_color(img, color, figure, 500)
             x, y, w, h = contour_info
+            # 만약 가운데가 비어있는 링이 아닌 사각형이라면
+            if not self.figure_handler.is_ring(color, figure, img[x : x+w+1][y : y+h+1]):
+                continue
+
             if (
                     cam_width * (0.5 - self.range_params.find_range_percentage) <= x + w // 2 <= cam_width * (
                     0.5 + self.range_params.find_range_percentage)
@@ -265,14 +284,7 @@ class RectangleRingDetection:
             self.tello.send_rc_control(*velocity)
         self.tello.send_rc_control(0, 0, 0, 0)
         cv2.destroyAllWindows()
-    def move_until_find_rectangle_ring_no_rotate(self, color, direction, brightness=0):
-        """
-        사각 링을 찾을 때까지 움직임. (회전 없이)
-        :param color: 색
-        :param direction: 방향
-        :param brightness: 밝기
-        :return:
-        """
+
 
 
     def find_number_and_contour_info_with_color_rectangle(self, img, color, save=False, rectangle_contour=False):
@@ -292,7 +304,7 @@ class RectangleRingDetection:
         result = -1
 
         # 색 찾기
-        contour_info, _ = self.figure_handler.find_color(img, color, Figure.RECTANGLE)
+        contour_info, _ = self.figure_handler.find_color(img, color, Figure.RECTANGLE, 500)
         x, y, w, h = contour_info
         if rectangle_contour:
             coord_list = self.figure_handler.find_color_with_all_contour(img, color, Figure.RECTANGLE, 500)
@@ -354,3 +366,4 @@ class RectangleRingDetection:
 
         print('색, 숫자 매칭 완료')
         return result, (x, y, w, h)
+
