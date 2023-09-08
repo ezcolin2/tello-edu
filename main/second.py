@@ -8,6 +8,7 @@ from main.module.enum.Color import *
 from main.module.enum.Direction import *
 from main.module.enum.Figure import *
 from main.module.handler.NumberHandler import NumberHandler
+
 import logging
 from djitellopy import Tello
 # 로그 설정
@@ -234,4 +235,3 @@ for i in range(3):
 
     # 180도 회전
     tello.rotate_clockwise(180)
-

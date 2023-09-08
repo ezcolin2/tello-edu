@@ -109,7 +109,7 @@ class FigureHandler:
             # 면적 큰 순으로 정렬
             temp = sorted(figureTypeArea, key=lambda x: x[2] * x[3])
             # 가장 큰 하나의 contour의 x, y, w, h 가져옴
-            x, y, w, h = temp[0]
+            x, y, w, h = temp[-1]
 
             # 가장 큰 면적의 인덱스를 통해서 가장 큰 하나의 contour의 objType 알아내기
             max_idx = figureTypeArea.index(temp[0])
