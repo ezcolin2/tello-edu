@@ -115,7 +115,7 @@ class NumberHandler:
         :param img: 이미지 원본 (웹캠)
         :param mask: 원하는 숫자만 추출해낸 이미지
         :param min_area: 감지할 숫자의 가장 작은 면적
-        :return: (x, y, w, h) 리스트
+        :return: (x, y, w, h), predicted 리스트
         """
 
         kernel = np.ones((5, 5), np.uint8)
@@ -243,8 +243,8 @@ class NumberHandler:
         kernel = np.ones((5, 5), np.uint8)
 
         # HSV 범위
-        lower_color = np.array([0, 110, 0])
-        upper_color = np.array([180, 255, 255])
+        lower_color = np.array([0, 50, 0])
+        upper_color = np.array([179, 255, 255])
 
         # 마스크 생성
         mask = cv2.inRange(hsv_image, lower_color, upper_color)

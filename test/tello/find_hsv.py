@@ -1,5 +1,5 @@
 import time
-from module.params import *
+from main.module.params import *
 import cv2
 from djitellopy import Tello
 import logging

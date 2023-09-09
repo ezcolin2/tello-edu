@@ -125,6 +125,28 @@ class FigureHandler:
             cv2.imshow("image adn mask", stacked_image)
 
         return (x, y, w, h), figure_type
+    def _get_biggest_contour_area(self, img, mask, figure, min_area, draw_contour=True):
+        """
+        mask로부터 contour를 얻어내서 가장 큰 contour의 넓이 반환
+        하나의 도형만 감지
+        :param img: 이미지 원본 (웹캠)
+        :param mask: 원하는 색만 추출해낸 이미지
+        :return: 도형 중심 좌표 (x, y)와 얻은 모든 contour의 점 개수
+        """
+        # (이미지, retrieval method) RETR_EXTERNAL은 outer detail을 찾거나 outer corner를 찾을 때 유용함.
+        contours, hierarchy = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+        imgResult = img.copy()
+        x, y, w, h = 0, 0, 0, 0
+        area_list = []
+
+        max_idx = -1
+        figure_type = -1
+        for cnt in contours:
+            area = cv2.contourArea(cnt)
+            area_list.append(area)
+        area_list.sort()
+        return area_list[-1]
+
 
     def _get_all_contours(self, img, mask, figure, min_area, draw_contours=False):
         """
@@ -170,7 +192,10 @@ class FigureHandler:
                 stacked_image = self.image_handler.stackImages(0.6, [imgResult, mask])
                 cv2.imshow("image adn mask", stacked_image)
         return approx_list
+
     def is_ring(self, color, figure, cropped_img):
+        return self.check_ring_by_cnt(color, figure, cropped_img) or self.check_ring_by_area(color, figure, cropped_img)
+    def check_ring_by_cnt(self, color, figure, cropped_img):
         """
         가장 바깥쪽 contour 정보를 받아서 이 도형이 가운데가 비어있는 링 형태인지 반환.
         get_biggest_contour와 함께 쓰는 것을 추천.
@@ -200,4 +225,38 @@ class FigureHandler:
                     return False
             return True
         return False
+
+    def check_ring_by_area(self, color, figure, cropped_img):
+        """
+        가장 바깥쪽 contour 정보를 받아서 이 도형이 가운데가 비어있는 링 형태인지 반환.
+        area를 계산해서 외접 사각형과의 넓이 비율을 계산.
+        :param color: Color Enum 타입
+        :param figure: Figure Enum 타입
+        :param cropped_img: contour를 기준으로 자른 이미지
+        :return: boolean 타입
+        """
+
+        # mask 구하기
+        imgHSV = cv2.cvtColor(cropped_img, cv2.COLOR_BGR2HSV)
+        lower = np.array([myColors[color.value][0:3]])
+        upper = np.array([myColors[color.value][3:6]])
+        mask = cv2.inRange(imgHSV, lower, upper)
+        kernel = np.ones((5, 5), np.uint8)
+        mask = cv2.dilate(mask, kernel, iterations=2)
+        # 자른 이미지에서 모든 contour를 구함.
+        cropped_area = cropped_img.shape[0] * cropped_img.shape[1]
+
+        # 가장 큰 contour의 좌표 정보 구함
+        contour_info, figure_type = self._get_biggest_contour(cropped_img, mask, figure, 100, draw_contour=False)
+        x, y, w, h = contour_info
+
+        # 가장 큰 contour의 면적 구함
+        area = self._get_biggest_contour_area(cropped_img, mask, figure, 100, draw_contour=False)
+
+        print((area/(w*h))*100)
+        # 반절 미만을 차지하면 링이라고 판단
+        if area < w*h*0.5:
+            return True
+        else:
+            return False
 

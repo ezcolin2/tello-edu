@@ -9,17 +9,8 @@ from main.module.enum.Color import *
 from main.module.enum.Direction import *
 from main.module.enum.Figure import *
 from main.module.handler.NumberHandler import NumberHandler
-
 import logging
 from djitellopy import Tello
-def find_flag(tello:Tello, color:Color):
-    """
-    사각형이 아닌 경우 사각형을 찾을 때까지 flag 주위를 돎
-    :param tello: Tello 객체
-    :param color: Color enum 타입
-    :return: 인식한 숫자
-    """
-
 # 로그 설정
 logging.getLogger('djitellopy').setLevel(logging.WARNING)
 
@@ -40,9 +31,21 @@ cam_params = CamParams(cam_width, cam_height)
 pid_params = PIDParams([0.13, 0.13, 0], [0.13, 0.13, 0], [0.0001, 0.0001, 0])
 range_params = RangeParams([80000, 120000], [0.45 * cam_params.width, 0.55 * cam_params.height], 3000, 0.05, 0.01, 0.3)
 number_handler = NumberHandler(model)
-
 rectangle_ring_detection = RectangleRingDetection(tello, cam_params, pid_params, range_params, number_handler)
+
 figure_detection = FigureDetectionTello(tello, cam_params, pid_params, range_params)
+def first():
+    # 일단 아무거나 찾음
+    figure_detection.move_until_find_figure(Color.GREEN, Figure.ANY, Direction.CLOCKWISE, brightness=30)
+
+    # 찾은 도형 판단
+    frame_read = tello.get_frame_read()
+    my_frame = frame_read.frame
+    img = cv2.resize(my_frame+30, (cam_width, cam_height))
+    contour_info, object_type = figure_detection.figure_handler.find_color(img, Color.GREEN, Figure.ANY, 1000, draw_contour=True)
+    print(contour_info, object_type)
+    cv2.imshow("hello", img)
+    cv2.waitKey()
 
 # 연결
 tello.connect()
@@ -67,4 +70,8 @@ tello.takeoff()
 print('이륙')
 time.sleep(2)
 # 도형들이 위치한 높이까지 올라간다.
-tello.move_up(30)
+tello.move_up(40)
+print('위로 이동')
+time.sleep(2)
+
+first()

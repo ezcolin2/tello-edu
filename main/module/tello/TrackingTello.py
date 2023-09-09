@@ -100,40 +100,11 @@ class TrackingTello:
             return False, error
 
         # 가로세로비가 적절하다면 정면을 보고 있다는 것
+        # 정면을 보고 있다면 멈춤
+        # 이후 과정은 track_figure_with_no_rotate에서 진행
 
         else:
-            # contour 중심과 이미지 중심 좌표의 차이
-            error = x + w // 2 - cam_width // 2
-            speed = p * error + i * (error - p_error)
-            speed = int(np.clip(speed, -100, 100))
-            fb = 0
-            ud = 0
-            area = w * h
-            if self.range_params.fb_range[0] <= area <= self.range_params.fb_range[1]:  # 적당하다면 멈춤
-                fb = 0
-                if (
-                        cam_width * (0.5 - self.range_params.center_range_percentage) <= x + w // 2 <= cam_width * (0.5 + self.range_params.center_range_percentage)
-                        and cam_height * (0.5 - self.range_params.center_range_percentage) <= y + h // 2 <= cam_height * (0.5 + self.range_params.center_range_percentage)
-                ):
-                    # if speed==0:
-                    return True, error
-            elif area > self.range_params.fb_range[1]:  # 너무 가깝다면 뒤로
-                fb = -10
-            elif area < self.range_params.fb_range[0] and area != 0:  # 너무 멀다면 앞으로
-                fb = 10
-
-            if self.range_params.ud_range[0] <= y + h // 2 <= self.range_params.ud_range[1]:
-                ud = 0
-            elif y + h // 2 > self.range_params.ud_range[1]:  # 너무 아래라면 위로
-                ud = -20
-            elif y + h // 2 < self.range_params.ud_range[0]:  # 너무 아래라면 위로
-                ud = 20
-
-            if x == 0:
-                speed = 0
-                error = 0
-            self.tello.send_rc_control(0, fb, ud, speed)
-            return False, error
+            return True, 0
 
     def track_figure_with_no_rotate(
             self,

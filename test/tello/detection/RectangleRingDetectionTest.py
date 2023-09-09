@@ -56,7 +56,7 @@ tello.streamon()
 tello.send_rc_control(0, 0, 0, 0)
 # 이륙
 tello.takeoff()
-tello.move_up(50)
+tello.move_up(70)
 # 원하는 색상 도형 찾아서 가운데로
 # rectangle_ring_detection.move_until_find_figure(Color.BLUE, Figure.RECTANGLE, Direction.RIGHT, brightness=30)
 # rectangle_ring_detection.tello_detection_rectangle_ring_with_no_rotate(Color.BLUE, Figure.RECTANGLE, brightness=30, save=True)
@@ -70,15 +70,27 @@ tello.move_up(50)
 # tello.move_forward(200)
 
 # 원하는 사각형 링 찾을 때까지 회전
-rectangle_ring_detection.move_until_find(Color.GREEN, Figure.RECTANGLE, Direction.CLOCKWISE, brightness=30)
+rectangle_ring_detection.move_until_find(Color.RED, Figure.RECTANGLE, Direction.CLOCKWISE, brightness=30)
 
 # 가로세로비율 적당히 맞춤
-ring_detection_rotate.tello_detection_rectangle_ring_with_rotate(Color.GREEN, Figure.RECTANGLE, brightness=30)
+# ring_detection_rotate.tello_detection_rectangle_ring_with_rotate(Color.BLUE, Figure.RECTANGLE, brightness=30)
 
 # 중심 맞추기
-rectangle_ring_detection.tello_detection_rectangle_ring_with_no_rotate(Color.GREEN, Figure.RECTANGLE, brightness=30, save=True)
+rectangle_ring_detection.tello_detection_rectangle_ring_with_no_rotate(Color.RED, Figure.RECTANGLE, brightness=30, save=True)
+# 통과
+tello.move_down(40)
+tello.move_forward(200)
+tello.land()
+# 원하는 사각형 링 찾을 때까지 회전
+rectangle_ring_detection.move_until_find(Color.BLUE, Figure.RECTANGLE, Direction.CLOCKWISE, brightness=30)
+
+# 가로세로비율 적당히 맞춤
+# ring_detection_rotate.tello_detection_rectangle_ring_with_rotate(Color.BLUE, Figure.RECTANGLE, brightness=30)
+
+# 중심 맞추기
+rectangle_ring_detection.tello_detection_rectangle_ring_with_no_rotate(Color.BLUE, Figure.RECTANGLE, brightness=30, save=True)
 
 # 통과
 tello.move_down(40)
-tello.move_forward(100)
+tello.move_forward(200)
 tello.land()
