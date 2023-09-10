@@ -35,7 +35,7 @@ figure_handler.find_color_with_all_contour(img, Color.GREEN, Figure.RECTANGLE, 5
 
 cv2.imshow("origin image", img)
 
-print(figure_handler.check_ring_by_cnt(Color.RED, Figure.RECTANGLE, cropped_img_rectangle))
+print(figure_handler.is_ring(Color.RED, Figure.RECTANGLE, cropped_img_rectangle))
 
 img2 = cv2.imread("images/img.png")
 figure_handler.find_color(img2, Color.GREEN, Figure.RECTANGLE, 100, draw_contour=True)
@@ -60,6 +60,21 @@ print(f'초록색 링 여부 : {is_blue_ring}, 정답 : False')
 
 
 figure_handler.find_color_with_all_contour(img3, Color.GREEN, Figure.RECTANGLE, 0, draw_contour=True)
-
 cv2.imshow("hello2", img3)
+
+img4 = cv2.imread("images/img_2.png")
+
+# 잘린 사각형 링 이미지 감지 테스트
+contour_info, figure_type, = figure_handler.find_color(img4, Color.BLUE, Figure.ANY, 100, draw_contour=True)
+x, y, w, h = contour_info
+is_blue_ring = figure_handler.is_ring(Color.BLUE, Figure.ANY, img4[y : y+h, x : x+w])
+print(f'파란색 링 여부 : {is_blue_ring}, 정답 : False')
+
+contour_info, figure_type, = figure_handler.find_color(img4, Color.RED, Figure.ANY, 100, draw_contour=True)
+x, y, w, h = contour_info
+print(contour_info)
+is_red_ring = figure_handler.is_ring(Color.RED, Figure.ANY, img4[y : y+h, x : x+w])
+print(f'빨간색 링 여부 : {is_red_ring}, 정답 : True')
+cv2.imshow("hello2", img4)
+
 cv2.waitKey()

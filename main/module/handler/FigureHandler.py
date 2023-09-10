@@ -243,6 +243,17 @@ class FigureHandler:
         mask = cv2.inRange(imgHSV, lower, upper)
         kernel = np.ones((5, 5), np.uint8)
         mask = cv2.dilate(mask, kernel, iterations=2)
+
+        # 가운데 작은 사각형으로 변경
+        height = cropped_img.shape[0]
+        width = cropped_img.shape[1]
+        img_height = int(height * 0.7)
+        img_width = int(width * 0.7)
+        cropped_img = cropped_img[(height - img_height) // 2:height - (height - img_height) // 2,
+                      (width - img_width) // 2:height - (width - img_width) // 2]
+
+        cv2.imshow("cropped img", cropped_img)
+
         # 자른 이미지에서 모든 contour를 구함.
         cropped_area = cropped_img.shape[0] * cropped_img.shape[1]
 
@@ -259,4 +270,3 @@ class FigureHandler:
             return True
         else:
             return False
-

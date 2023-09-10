@@ -122,7 +122,7 @@ class FigureAndNumberDetectionTello:
                     and cam_height * (0.5 - self.range_params.find_range_percentage) <= y + h // 2 <= cam_height * (0.5 + self.range_params.find_range_percentage)
                     and figureType >= 0
                     and w * h > self.range_params.min_area
-                    and not self.figure_handler.check_ring_by_cnt(color, Figure.RECTANGLE, img[y : y + h, x : x + w])
+                    and not self.figure_handler.is_ring(color, Figure.RECTANGLE, img[y : y + h, x : x + w])
             ):
                 cnt += 1
                 self.tello.send_rc_control(0, 0, 0, 0)
