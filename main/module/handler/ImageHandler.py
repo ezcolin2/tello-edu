@@ -50,7 +50,7 @@ class ImageHandler:
         kernel = np.ones((5, 5), np.uint8)
 
         # HSV 범위
-        lower_color = np.array([0, 110, 0])
+        lower_color = np.array([0, 100, 0])
         upper_color = np.array([180, 255, 255])
 
         # 마스크 생성

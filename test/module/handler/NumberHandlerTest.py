@@ -90,7 +90,18 @@ result = number_handler.find_all_numbers(three_six_nine_only_red, 500)
 for (x, y, w, h), predicted in result:
     cv2.rectangle(three_six_nine_only_red, (x, y), (x+w, y+h), (255, 0, 0), 2)
     cv2.putText(three_six_nine_only_red, str(predicted), (x + w // 2, y - 20), cv2.FONT_ITALIC, 1, (0, 0, 0),thickness=3)
+# 작은 숫자 이미지
+hihi = cv2.imread("images/09-15.png")
+result = number_handler.find_all_numbers(hihi, 500)
+for (x, y, w, h), predicted in result:
+    cv2.rectangle(hihi, (x, y), (x+w, y+h), (255, 0, 0), 2)
+    cv2.putText(hihi, str(predicted), (x + w // 2, y - 20), cv2.FONT_ITALIC, 1, (0, 0, 0),thickness=3)
+# (x, y, w, h), predicted = number_handler.find_biggest_number(hihi, 1000)
+# print(x, y, w, h, predicted)
+# cv2.rectangle(hihi, (x, y), (x+w, y+h), (255, 0, 0), 2)
+# cv2.putText(hihi, str(predicted), (x + w // 2, y - 20), cv2.FONT_ITALIC, 1, (0, 0, 0),thickness=3)
 # 여러 숫자 이미지
 stacked_img = stackImages(0.6, ([[one_img, one_img_big, numbers], [one_seven_nine, seven_nine, three_six_nine_only_red]]))
 cv2.imshow("stack", stacked_img)
+cv2.imshow("small", hihi)
 cv2.waitKey()

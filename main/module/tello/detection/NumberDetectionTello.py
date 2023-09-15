@@ -5,6 +5,7 @@ from main.module.params.RangeParams import RangeParams
 from main.module.params.CamParams import CamParams
 from main.module.tello.TrackingTello import TrackingTello
 from main.module.handler.NumberHandler import NumberHandler
+from main.module.handler.ImageHandler import ImageHandler
 class NumberDetectionTello:
 
     def __init__(
@@ -21,18 +22,21 @@ class NumberDetectionTello:
         self.range_params: RangeParams = range_params
         self.tracking_tello: TrackingTello = TrackingTello(tello, range_params, pid_params, cam_params)
         self.number_handler: NumberHandler = NumberHandler(model)
+        self.image_handler : ImageHandler = ImageHandler()
         self.model = model
 
-    def move_until_find_number(self, direction, brightness=0):
+    def move_until_find_number(self, direction, brightness=0, save=True):
         """
         숫자를 찾을 때까지 이동  (단순 검정 검출)
         :param direction: Direction enum 타입
-        :return: 없음
+        :return: 예측 숫자
         """
         cnt = 0
         cam_width = self.cam_params.width
         cam_height = self.cam_params.height
-
+        img = None
+        predicted = -1
+        x, y, w, h = 0, 0, 0, 0
         while cnt < 4:
             velocity = [0, 0, 0, 0] # send_rc_control의 인자로 들어갈 값.
             frame_read = self.tello.get_frame_read()
@@ -44,14 +48,13 @@ class NumberDetectionTello:
             # img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             # thr, mask = cv2.threshold(img, 95, 255, cv2.THRESH_BINARY_INV)
             # mask = cv2.dilate(mask, kernel, iterations=1)Vk
-            contour_info = self.number_handler.find_biggest_number(img, 500)
-            cv2.imshow("asdf", img)
-
+            img = self.image_handler.delete_color(img)
+            contour_info, predicted = self.number_handler.find_biggest_number(img, 500)
             x, y, w, h = contour_info
             if (
                     x!= 0 and y!=0 and w!=0 and h!=0
-                    and cam_width * (0.5 - self.range_params.find_range_percentage) <= x + w // 2 <= cam_width * (0.5 + self.range_params.find_range_percentage)
-                    and cam_height * (0.5 - self.range_params.find_range_percentage) <= y + h // 2 <= cam_height * (0.5 + self.range_params.find_range_percentage)
+                    and cam_width * (0.5 - self.range_params.find_range_percentage//2) <= x + w // 2 <= cam_width * (0.5 + self.range_params.find_range_percentage//2)
+                    and cam_height * (0.5 - self.range_params.find_range_percentage//2) <= y + h // 2 <= cam_height * (0.5 + self.range_params.find_range_percentage//2)
             ):
                 cnt += 1
                 self.tello.send_rc_control(0, 0, 0, 0)
@@ -64,7 +67,11 @@ class NumberDetectionTello:
             velocity[direction.value//2] = v
             self.tello.send_rc_control(*velocity)
         self.tello.send_rc_control(0, 0, 0, 0)
+        cv2.imshow("asdf", img)
+        cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 255), thickness=2)
+        cv2.imwrite("number.png", img)
         cv2.destroyAllWindows()
+        return predicted
     # def move_until_find_specific_number(self, direction, number, brightness=0):
     #     """
     #     원하는 숫자를 찾을 때까지 이동하는 함수

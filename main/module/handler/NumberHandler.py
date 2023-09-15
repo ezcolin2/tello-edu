@@ -243,7 +243,7 @@ class NumberHandler:
         kernel = np.ones((5, 5), np.uint8)
 
         # HSV 범위
-        lower_color = np.array([0, 50, 0])
+        lower_color = np.array([0, 130, 0])
         upper_color = np.array([179, 255, 255])
 
         # 마스크 생성

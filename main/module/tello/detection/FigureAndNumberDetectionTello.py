@@ -49,9 +49,11 @@ class FigureAndNumberDetectionTello:
         """
         print('도형 감지 시작')
         p_error = 0
+        p_error_lr = 0
+        p_error_ud = 0
+        p_error_fb = 0
         cam_width = self.cam_params.width
         cam_height = self.cam_params.height
-        pid = [-0.1, 0.1, 0]
         x, y, w, h = 0, 0, 0, 0
         while True:
             frame_read = self.tello.get_frame_read()
@@ -60,7 +62,7 @@ class FigureAndNumberDetectionTello:
             contour_info, figure_type = self.figure_handler.find_color_except_ring(img, color, Figure.ANY, 1000, draw_contour=True)
             x, y, w, h = contour_info
             # 객체 가운데로
-            success, p_error, = self.tracking_tello.track_figure_with_rotate(contour_info, p_error, same_ratio=True)
+            success, p_error_lr, p_error_ud, p_error_fb = self.tracking_tello.track_figure_with_rotate(contour_info, p_error_lr, p_error_ud, p_error_fb)
 
             if success:
                 break
@@ -259,7 +261,7 @@ class FigureAndNumberDetectionTello:
                 cv2.putText(img_result, str(result), (x + w // 2, y - 20), cv2.FONT_ITALIC, 1, (255, 255, 255),
                             thickness=3)
 
-                cv2.imwrite(f'second_result/{Color(color.value).name}_number.png', img_result)
+                cv2.imwrite(f'{Color(color.value).name}_number.png', img_result)
 
         print('색, 숫자 매칭 완료')
         return result, (x, y, w, h)
