@@ -37,7 +37,7 @@ class FigureDetectionTello:
         p_error = 0
         cam_width = self.cam_params.width
         cam_height = self.cam_params.height
-        pid = self.pid_params.pid_value
+        # pid = self.pid_params.pid_value
         while True:
             frame_read = self.tello.get_frame_read()
             my_frame = frame_read.frame

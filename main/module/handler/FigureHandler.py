@@ -21,6 +21,33 @@ class FigureHandler:
 
         # 빨간색이 감지가 잘 안 돼서 빨간색 감지할 때는 초록, 파랑색을 없앰
         if color == Color.RED:
+            img[:] = self.image_handler.delete_specific_color(img, Color.BLUE)[:]
+            img[:] = self.image_handler.delete_specific_color(img, Color.GREEN)[:]
+
+        imgHSV = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+        lower = np.array([myColors[color.value][0:3]])
+        upper = np.array([myColors[color.value][3:6]])
+        mask = cv2.inRange(imgHSV, lower, upper)
+        kernel = np.ones((5, 5), np.uint8)
+        mask = cv2.dilate(mask, kernel, iterations=3)
+
+        contour_info, objType = self._get_biggest_contour(img, mask, figure, min_area, draw_contour=draw_contour)
+
+        return contour_info, objType
+    def find_color_except_ring(self, img, color, figure, min_area, draw_contour=False):
+        """
+        인자로 들어온 Color에 해당하는 도형이 있으면 (링 제외) 외접 사각형의 중심 좌표 반환
+        코드 참조 : https://github.com/murtazahassan/Learn-OpenCV-in-3-hours
+        :param img: 이미지 원본
+        :param color: Color enum
+        :return: contour 정보 (x, y, w, h)와 점 개수
+        """
+
+        # 이거는 BGR2HSV 사용해야 함.
+        # HSV로 변환하면 grayscale로 바꿔주고 채널이 하나.
+
+        # 빨간색이 감지가 잘 안 돼서 빨간색 감지할 때는 초록, 파랑색을 없앰
+        if color == Color.RED:
             img = self.image_handler.delete_specific_color(img, Color.BLUE)
             img = self.image_handler.delete_specific_color(img, Color.GREEN)
 
@@ -29,13 +56,66 @@ class FigureHandler:
         upper = np.array([myColors[color.value][3:6]])
         mask = cv2.inRange(imgHSV, lower, upper)
         kernel = np.ones((5, 5), np.uint8)
-        mask = cv2.dilate(mask, kernel, iterations=2)
+        mask = cv2.dilate(mask, kernel, iterations=1)
 
 
-        contour_info, objType = self._get_biggest_contour(img, mask, figure, min_area, draw_contour=draw_contour)
+        # (이미지, retrieval method) RETR_EXTERNAL은 outer detail을 찾거나 outer corner를 찾을 때 유용함.
+        contours, hierarchy = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+        imgResult = img.copy()
+        x, y, w, h = 0, 0, 0, 0
+        figureTypeList = []  # 모든 contour
+        figureTypeArea = []  # contour 주위 직사각형의 넓이. 가장 큰 하나의 contour를 구하기 위함.
 
-        stacked_img = self.image_handler.stackImages(0.6, [img, mask])
-        return contour_info, objType
+        max_idx = -1
+        figure_type = -1
+        for cnt in contours:
+            area = cv2.contourArea(cnt)
+            # minimum threshold를 정하면 noise를 줄일 수 있음
+            if area > min_area:  # area가 500보다 클 때만 contour 그리기
+                # 이미지 원본에 contour 그리기
+                # curve 길이 구하기
+                peri = cv2.arcLength(cnt, True)
+
+                # 점 위치
+                approx = cv2.approxPolyDP(cnt, 0.02 * peri, True)
+                objType = len(approx)
+                if count[figure.value][0] <= objType <= count[figure.value][1]:
+                    # print("ok")
+                    x_t, y_t, w_t, h_t = cv2.boundingRect(approx)
+
+                    if not self.is_ring(color, figure, img[y_t : y_t+h_t, x_t : x_t+w_t]):
+                        figureTypeList.append(objType)
+                        figureTypeArea.append((x_t, y_t, w_t, h_t))
+                # if figure.value == Figure.TRI.value and objType == 3:
+                #     print('tri')
+                # elif count[figure.value][0]<=objType <= count[figure.value][1]:
+                #     print(f'circle : {objType}')
+                #     print('circle')
+
+                # # 도형 주변에 표시하고 contour 정보 리스트에 추가
+                # cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 0), 2)
+
+        if len(figureTypeArea) != 0 and len(figureTypeList) != 0:
+            # 면적 큰 순으로 정렬
+            temp = sorted(figureTypeArea, key=lambda x: x[2] * x[3])
+            # 가장 큰 하나의 contour의 x, y, w, h 가져옴
+            x, y, w, h = temp[-1]
+
+            # 가장 큰 면적의 인덱스를 통해서 가장 큰 하나의 contour의 objType 알아내기
+            max_idx = figureTypeArea.index(temp[-1])
+        if max_idx != -1:
+            figure_type = figureTypeList[max_idx]
+        if draw_contour and figure_type!=-1:
+            cv2.rectangle(imgResult, (x, y), (x+w, y+h), (0, 255, 255), thickness=2)
+            cv2.putText(imgResult, f'area : {w * h}', (x, y - 10), cv2.FONT_ITALIC, 0.7, (0, 255, 255), 2)
+            cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 255), thickness=2)
+            cv2.putText(img, f'area : {w * h}', (x, y - 10), cv2.FONT_ITALIC, 0.7, (0, 255, 255), 2)
+
+            stacked_image = self.image_handler.stackImages(0.6, [imgResult, mask])
+            cv2.imshow("image adn mask", stacked_image)
+
+        return (x, y, w, h), figure_type
+
 
     def find_color_with_all_contour(self, img, color, figure, min_area, draw_contour=False):
         """
@@ -92,8 +172,8 @@ class FigureHandler:
                 approx = cv2.approxPolyDP(cnt, 0.02 * peri, True)
                 objType = len(approx)
                 if count[figure.value][0] <= objType <= count[figure.value][1]:
-                    if draw_contour:
-                        cv2.drawContours(img, cnt, -1, (0, 255, 255), 3)
+                    # if draw_contour:
+                    #     cv2.drawContours(img, cnt, -1, (0, 255, 255), 3)
                     # print("ok")
                     x, y, w, h = cv2.boundingRect(approx)
                     figureTypeList.append(objType)
@@ -120,11 +200,14 @@ class FigureHandler:
         if draw_contour and figure_type!=-1:
             cv2.rectangle(imgResult, (x, y), (x+w, y+h), (0, 255, 255), thickness=2)
             cv2.putText(imgResult, f'area : {w * h}', (x, y - 10), cv2.FONT_ITALIC, 0.7, (0, 255, 255), 2)
+            cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 255), thickness=2)
+            cv2.putText(img, f'area : {w * h}', (x, y - 10), cv2.FONT_ITALIC, 0.7, (0, 255, 255), 2)
 
             stacked_image = self.image_handler.stackImages(0.6, [imgResult, mask])
             cv2.imshow("image adn mask", stacked_image)
 
         return (x, y, w, h), figure_type
+
     def _get_biggest_contour_area(self, img, mask, figure, min_area, draw_contour=True):
         """
         mask로부터 contour를 얻어내서 가장 큰 contour의 넓이 반환
@@ -194,7 +277,11 @@ class FigureHandler:
         return approx_list
 
     def is_ring(self, color, figure, cropped_img):
-        return self.check_ring_by_cnt(color, figure, cropped_img) or self.check_ring_by_area(color, figure, cropped_img)
+        if self.check_ring_by_cnt(color, figure, cropped_img):
+            return True
+        elif self.check_ring_by_area(color, figure, cropped_img):
+            return True
+        return False
     def check_ring_by_cnt(self, color, figure, cropped_img):
         """
         가장 바깥쪽 contour 정보를 받아서 이 도형이 가운데가 비어있는 링 형태인지 반환.
@@ -250,8 +337,7 @@ class FigureHandler:
         img_height = int(height * 0.7)
         img_width = int(width * 0.7)
         cropped_img = cropped_img[(height - img_height) // 2:height - (height - img_height) // 2,
-                      (width - img_width) // 2:height - (width - img_width) // 2]
-
+                      (width - img_width) // 2:width - (width - img_width) // 2]
         cv2.imshow("cropped img", cropped_img)
 
         # 자른 이미지에서 모든 contour를 구함.
@@ -264,7 +350,6 @@ class FigureHandler:
         # 가장 큰 contour의 면적 구함
         area = self._get_biggest_contour_area(cropped_img, mask, figure, 100, draw_contour=False)
 
-        print((area/(w*h))*100)
         # 반절 미만을 차지하면 링이라고 판단
         if area < w*h*0.5:
             return True

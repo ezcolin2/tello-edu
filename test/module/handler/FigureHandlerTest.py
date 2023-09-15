@@ -1,8 +1,10 @@
 from main.module.handler.FigureHandler import FigureHandler
+from main.module.handler.ImageHandler import ImageHandler
 from main.module.enum.Color import Color
 from main.module.enum.Figure import Figure
 import cv2
 figure_handler = FigureHandler()
+image_handler = ImageHandler()
 # 사각형 링 감지 테스트
 img = cv2.imread("images/3_6_9.png")
 contour_info ,object_type = figure_handler.find_color(img, Color.GREEN, Figure.RECTANGLE, 100)
@@ -65,16 +67,19 @@ cv2.imshow("hello2", img3)
 img4 = cv2.imread("images/img_2.png")
 
 # 잘린 사각형 링 이미지 감지 테스트
-contour_info, figure_type, = figure_handler.find_color(img4, Color.BLUE, Figure.ANY, 100, draw_contour=True)
+contour_info, figure_type, = figure_handler.find_color_except_ring(img4, Color.BLUE, Figure.ANY, 100, draw_contour=True)
 x, y, w, h = contour_info
 is_blue_ring = figure_handler.is_ring(Color.BLUE, Figure.ANY, img4[y : y+h, x : x+w])
 print(f'파란색 링 여부 : {is_blue_ring}, 정답 : False')
 
 contour_info, figure_type, = figure_handler.find_color(img4, Color.RED, Figure.ANY, 100, draw_contour=True)
-x, y, w, h = contour_info
-print(contour_info)
-is_red_ring = figure_handler.is_ring(Color.RED, Figure.ANY, img4[y : y+h, x : x+w])
-print(f'빨간색 링 여부 : {is_red_ring}, 정답 : True')
-cv2.imshow("hello2", img4)
 
+# is_red_ring = figure_handler.is_ring(Color.RED, Figure.ANY, img4[y : y+h, x : x+w])
+# print(f'빨간색 링 여부 : {is_red_ring}, 정답 : True')
+#
+# contour_info, figure_type, = figure_handler.find_color_except_ring(img4, Color.RED, Figure.ANY, 100, draw_contour=True)
+# x, y, w, h = contour_info
+# cv2.rectangle(img4, (x, y), (x+w, y+h), (0, 255, 255),thickness=3)
+cv2.imshow("hello3", img4)
+#
 cv2.waitKey()

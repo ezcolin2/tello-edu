@@ -87,7 +87,7 @@ class ImageHandler:
         mask = cv2.inRange(hsv_image, lower_color, upper_color)
 
         # 노이즈 제거
-        dilated_mask = cv2.dilate(mask, kernel, iterations=2)
+        dilated_mask = cv2.dilate(mask, kernel, iterations=10)
 
         temp_img = np.copy(img)
 

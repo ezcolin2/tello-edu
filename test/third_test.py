@@ -4,7 +4,7 @@ from main.module.params.PIDParams import PIDParams
 from main.module.params.RangeParams import RangeParams
 from main.module.params.CamParams import CamParams
 from main.module.tello.detection.RectangleRingDetection import RectangleRingDetection
-from main.module.tello.detection.FigureDetectionTello import FigureDetectionTello
+from main.module.tello.detection.FigureAndNumberDetectionTello import FigureAndNumberDetectionTello
 from main.module.enum.Color import *
 from main.module.enum.Direction import *
 from main.module.enum.Figure import *
@@ -28,24 +28,46 @@ model.eval()  # 모델을 평가 모드로 설정
 cam_width = 640
 cam_height = 480
 cam_params = CamParams(cam_width, cam_height)
-pid_params = PIDParams([0.13, 0.13, 0], [0.13, 0.13, 0], [0.0001, 0.0001, 0])
-range_params = RangeParams([80000, 120000], [0.45 * cam_params.width, 0.55 * cam_params.height], 3000, 0.05, 0.01, 0.3)
+pid_params = PIDParams([0.1, 0.1, 0], [0.13, 0.13, 0], [0.0001, 0.0001, 0])
+range_params = RangeParams([60000, 140000], [0.45 * cam_params.width, 0.55 * cam_params.height], 3000, 0.1, 0.1, 0.3)
 number_handler = NumberHandler(model)
-rectangle_ring_detection = RectangleRingDetection(tello, cam_params, pid_params, range_params, number_handler)
 
-figure_detection = FigureDetectionTello(tello, cam_params, pid_params, range_params)
-def first():
+figure_detection = FigureAndNumberDetectionTello(tello, cam_params, pid_params, range_params, number_handler)
+def first(right, forward, color):
     # 일단 아무거나 찾음
-    figure_detection.move_until_find_figure(Color.GREEN, Figure.ANY, Direction.CLOCKWISE, brightness=30)
+    figure_detection.move_until_find_figure(color, Direction.COUNTERCLOCKWISE, brightness=30)
 
-    # 찾은 도형 판단
-    frame_read = tello.get_frame_read()
-    my_frame = frame_read.frame
-    img = cv2.resize(my_frame+30, (cam_width, cam_height))
-    contour_info, object_type = figure_detection.figure_handler.find_color(img, Color.GREEN, Figure.ANY, 1000, draw_contour=True)
-    print(contour_info, object_type)
-    cv2.imshow("hello", img)
-    cv2.waitKey()
+    # 중심 맞춤
+    figure_detection.tello_detection_with_rotate(color, brightness=30)
+    print('정면 바라보는 중')
+    figure_detection.tello_detection_with_no_rotate(color, Figure.ANY, brightness=30)
+
+    # 옆으로 이동
+    tello.move_right(right)
+    tello.move_forward(forward)
+
+    # 일단 아무거나 찾음
+    figure_detection.move_until_find_figure(color, Direction.COUNTERCLOCKWISE, brightness=30)
+
+    # 중심 맞춤
+    # figure_detection.tello_detection_with_rotate(color, brightness=30)
+    figure_detection.tello_detection_with_no_rotate(color, Figure.ANY, brightness=30)
+
+    # 옆으로 이동
+    tello.move_right(right)
+    tello.move_forward(forward)
+
+    # 일단 아무거나 찾음
+    figure_detection.move_until_find_figure(color, Direction.COUNTERCLOCKWISE, brightness=30)
+
+    # 중심 맞춤
+    # figure_detection.tello_detection_with_rotate(color, brightness=30)
+    figure_detection.tello_detection_with_no_rotate(color, Figure.ANY, brightness=30)
+
+    # 옆으로 이동
+    tello.move_right(right)
+    tello.move_forward(forward)
+
 
 # 연결
 tello.connect()
@@ -61,17 +83,14 @@ print(f'남은 배터리 : {tello.get_battery()}')
 
 # stream 끔
 tello.streamoff()
-# tello.send_rc_control(0, 0, 0, 0)
 # stream 킴
 tello.streamon()
-# tello.send_rc_control(0, 0, 0, 0)
 # 이륙
+tello.send_rc_control(0, 0, 0, 0)
 tello.takeoff()
 print('이륙')
-time.sleep(2)
-# 도형들이 위치한 높이까지 올라간다.
-tello.move_up(40)
-print('위로 이동')
+tello.move_up(60)
 time.sleep(2)
 
-first()
+first(80, 60, Color.RED)
+tello.land()

@@ -43,7 +43,7 @@ class TrackingTello:
         """
         # pid 적용
         x, y, w, h = contour_info
-        p, i, d = self.pid_params.pid_value
+        p, i, d = [0.1, 0.1, 0]
         cam_width = self.cam_params.width
         cam_height = self.cam_params.height
         aspect_ratio = 0
@@ -80,9 +80,9 @@ class TrackingTello:
             if self.range_params.ud_range[0] <= y + h // 2 <= self.range_params.ud_range[1]:
                 ud = 0
             elif y + h // 2 > self.range_params.ud_range[1]:  # 너무 위라면 아래로
-                ud = -20
+                ud = -10
             elif y + h // 2 < self.range_params.ud_range[0]:  # 너무 아래라면 위로
-                ud = 20
+                ud = 10
 
             if x == 0:
                 speed = 0
@@ -96,7 +96,7 @@ class TrackingTello:
             else:
                 temp_speed = temp_speed
 
-            self.tello.send_rc_control(temp_speed, -20, ud, -temp_speed)
+            self.tello.send_rc_control(temp_speed, fb, ud, -temp_speed)
             return False, error
 
         # 가로세로비가 적절하다면 정면을 보고 있다는 것
