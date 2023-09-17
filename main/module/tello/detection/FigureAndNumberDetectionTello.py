@@ -101,7 +101,7 @@ class FigureAndNumberDetectionTello:
 
             # 너무 가까이 가면 contour를 감지 못 하기 때문에 뒤로 이동
             if x==0 and y==0 and w==0 and h==0:
-                self.tello.move_back(30)
+                # self.tello.move_back(20)
                 continue
             # 객체 가운데로
             success, p_error_lr, p_error_ud, p_error_fb = self.tracking_tello.track_figure_with_no_rotate(contour_info, p_error_lr, p_error_ud, p_error_fb)
@@ -162,7 +162,7 @@ class FigureAndNumberDetectionTello:
             my_frame = frame_read.frame
             img = cv2.resize(my_frame+brightness, (cam_width, cam_height))
             cv2.imshow("asdf", img)
-            contour_info, figureType = self.figure_handler.find_color_except_ring(img, color, Figure.ANY, 5000)
+            contour_info, figureType = self.figure_handler.find_color_except_ring(img, color, Figure.ANY, 500, draw_contour=True)
             x, y, w, h = contour_info
 
             # 범위 안에 포함되어 있고 감지를 제대로 했으며 최소 면적을 넘고 사각형 링이 아니라는 것을 감지했다면
@@ -171,7 +171,7 @@ class FigureAndNumberDetectionTello:
                     and cam_height * (0.5 - self.range_params.find_range_percentage) <= y + h // 2 <= cam_height * (0.5 + self.range_params.find_range_percentage)
                     and figureType >= 0
                     and w * h > self.range_params.min_area
-                    # and not self.figure_handler.is_ring(color, Figure.RECTANGLE, img[y : y + h, x : x + w])
+                    and not self.figure_handler.is_ring(color, Figure.RECTANGLE, img[y : y + h, x : x + w])
             ):
                 cnt += 1
                 self.tello.send_rc_control(0, 0, 0, 0)
@@ -179,7 +179,7 @@ class FigureAndNumberDetectionTello:
                 break
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
-            v = 20
+            v = 35
             if direction.value % 2 == 1:  # 홀수라면 음수로 바꿈
                 v = -v
             velocity[direction.value // 2] = v

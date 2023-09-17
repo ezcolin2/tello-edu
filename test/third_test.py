@@ -29,8 +29,8 @@ model.eval()  # 모델을 평가 모드로 설정
 cam_width = 640
 cam_height = 480
 cam_params = CamParams(cam_width, cam_height)
-pid_params = PIDParams([0.07, 0.07, 0], [0.13, 0.13, 0], [0.0001, 0.0001, 0])
-range_params = RangeParams([60000, 140000], [0.45 * cam_params.width, 0.55 * cam_params.height], 3000, 0.1, 0.1, 0.3)
+pid_params = PIDParams([0.07, 0.07, 0], [0.2, 0.2, 0], [0.0001, 0.0001, 0])
+range_params = RangeParams([60000, 140000], [0.45 * cam_params.width, 0.55 * cam_params.height], 3000, 0.1, 0.1, 0.4)
 number_handler = NumberHandler(model)
 
 figure_detection = FigureAndNumberDetectionTello(tello, cam_params, pid_params, range_params, number_handler)
@@ -69,7 +69,7 @@ def first(right, forward, color):
     # predicted = number_detection.move_until_find_number(Direction.DOWN, brightness=30)
 
     # 숫자 예측
-    tello.move_back(80)
+    tello.move_back(40)
     frame_read = tello.get_frame_read()
     my_frame = frame_read.frame
     img = cv2.resize(my_frame + 30, (cam_width, cam_height))
@@ -131,6 +131,7 @@ print('이륙')
 tello.move_up(60)
 time.sleep(2)
 
-first(80, 40, Color.RED)
-first(80, 40, Color.GREEN)
+first(70, 60, Color.BLUE)
+first(70, 60, Color.GREEN)
+first(70, 60, Color.RED)
 tello.land()

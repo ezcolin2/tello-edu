@@ -82,8 +82,8 @@ class FigureHandler:
                 if count[figure.value][0] <= objType <= count[figure.value][1]:
                     # print("ok")
                     x_t, y_t, w_t, h_t = cv2.boundingRect(approx)
-
-                    if not self.is_ring(color, figure, img[y_t : y_t+h_t, x_t : x_t+w_t]):
+                    print(self.is_ring(color, figure, img[y_t: y_t + h_t, x_t: x_t + w_t]))
+                    if not self.is_ring(color, figure, img[y_t: y_t + h_t, x_t: x_t + w_t]):
                         figureTypeList.append(objType)
                         figureTypeArea.append((x_t, y_t, w_t, h_t))
                 # if figure.value == Figure.TRI.value and objType == 3:
@@ -334,8 +334,8 @@ class FigureHandler:
         # 가운데 작은 사각형으로 변경
         height = cropped_img.shape[0]
         width = cropped_img.shape[1]
-        img_height = int(height * 0.7)
-        img_width = int(width * 0.7)
+        img_height = int(height * 0.5)
+        img_width = int(width * 0.5)
         cropped_img = cropped_img[(height - img_height) // 2:height - (height - img_height) // 2,
                       (width - img_width) // 2:width - (width - img_width) // 2]
         cv2.imshow("cropped img", cropped_img)
