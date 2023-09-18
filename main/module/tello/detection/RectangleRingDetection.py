@@ -48,18 +48,18 @@ class RectangleRingDetection:
             frame_read = self.tello.get_frame_read()
             my_frame = frame_read.frame
             img = cv2.resize(my_frame + brightness, (cam_width, cam_height))
-            approx_list = self.figure_handler.find_color_with_all_contour(img ,color, figure, 10000)
+            approx_list = self.figure_handler.find_color_with_all_contour(img ,color, figure, 500)
             if approx_list:
                 print(approx_list[0][0])
                 for approx in approx_list:
                     x_temp, y_temp, w_temp, h_temp = cv2.boundingRect(approx)
 
                     # 감지한 contour 중 ring이 있다면 그 값을 저장
-                    if self.figure_handler.check_ring_by_cnt(color, figure, img[x_temp:x_temp + w_temp + 1][y_temp:y_temp + h_temp + 1]):
+                    if self.figure_handler.is_ring(color, figure, img[x_temp:x_temp + w_temp][y_temp:y_temp + h_temp]):
                         x, y, w, h = x_temp, y_temp, w_temp, h_temp
 
                         # rectangle ring에만 contour를 그림
-                        approx_list_ring = self.figure_handler.find_color_with_all_contour(img[x_temp:x_temp+w_temp+1][y_temp:y_temp+h_temp+1], color, figure, 10000, draw_contour=True)
+                        approx_list_ring = self.figure_handler.find_color_with_all_contour(img[x_temp:x_temp+w_temp][y_temp:y_temp+h_temp], color, figure, 10000, draw_contour=True)
 
                         # 외접, 내접 contour도 그리기
                     for i in approx:
@@ -147,7 +147,7 @@ class RectangleRingDetection:
 
             # 너무 가까이 가면 contour를 감지 못 하기 때문에 뒤로 이동
             if x==0 and y==0 and w==0 and h==0:
-                self.tello.move_back(30)
+                # self.tello.move_back(30)
                 continue
             # 객체 가운데로
             contour_info = (x, y, w, h)
@@ -272,7 +272,7 @@ class RectangleRingDetection:
             print(img[y:y+h, x:x+w])
             print(img[x:x+w][y:y+h])
             # 만약 가운데가 비어있는 링이 아닌 사각형이라면
-            if x != 0 and y != 0 and w != 0 and h != 0 and not self.figure_handler.check_ring_by_cnt(color, figure,
+            if x != 0 and y != 0 and w != 0 and h != 0 and not self.figure_handler.is_ring(color, figure,
                                                                                            img[y: y + h,x: x + w]):
                 continue
 

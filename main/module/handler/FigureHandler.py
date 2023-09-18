@@ -48,8 +48,8 @@ class FigureHandler:
 
         # 빨간색이 감지가 잘 안 돼서 빨간색 감지할 때는 초록, 파랑색을 없앰
         if color == Color.RED:
-            img = self.image_handler.delete_specific_color(img, Color.BLUE)
-            img = self.image_handler.delete_specific_color(img, Color.GREEN)
+            img[:] = self.image_handler.delete_specific_color(img, Color.BLUE)
+            img[:] = self.image_handler.delete_specific_color(img, Color.GREEN)
 
         imgHSV = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
         lower = np.array([myColors[color.value][0:3]])
@@ -65,6 +65,7 @@ class FigureHandler:
         x, y, w, h = 0, 0, 0, 0
         figureTypeList = []  # 모든 contour
         figureTypeArea = []  # contour 주위 직사각형의 넓이. 가장 큰 하나의 contour를 구하기 위함.
+        figureCntList = []
 
         max_idx = -1
         figure_type = -1
@@ -80,12 +81,17 @@ class FigureHandler:
                 approx = cv2.approxPolyDP(cnt, 0.02 * peri, True)
                 objType = len(approx)
                 if count[figure.value][0] <= objType <= count[figure.value][1]:
+
                     # print("ok")
                     x_t, y_t, w_t, h_t = cv2.boundingRect(approx)
-                    print(self.is_ring(color, figure, img[y_t: y_t + h_t, x_t: x_t + w_t]))
-                    if not self.is_ring(color, figure, img[y_t: y_t + h_t, x_t: x_t + w_t]):
+
+                    # ring이 아니고 가로세로 비율이 일정 비율 이상일 때만 추가
+                    if not self.is_ring(color, figure, img[y_t: y_t + h_t, x_t: x_t + w_t]) and w_t!=0 and h_t!=0 and min(w_t, h_t)/max(w_t, h_t)>=0.2:
+                        # if draw_contour:
+                        #     cv2.drawContours(img, cnt, -1, (0, 255, 255), 3)
                         figureTypeList.append(objType)
                         figureTypeArea.append((x_t, y_t, w_t, h_t))
+                        figureCntList.append(cnt)
                 # if figure.value == Figure.TRI.value and objType == 3:
                 #     print('tri')
                 # elif count[figure.value][0]<=objType <= count[figure.value][1]:
@@ -108,9 +114,9 @@ class FigureHandler:
         if draw_contour and figure_type!=-1:
             cv2.rectangle(imgResult, (x, y), (x+w, y+h), (0, 255, 255), thickness=2)
             cv2.putText(imgResult, f'area : {w * h}', (x, y - 10), cv2.FONT_ITALIC, 0.7, (0, 255, 255), 2)
-            cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 255), thickness=2)
-            cv2.putText(img, f'area : {w * h}', (x, y - 10), cv2.FONT_ITALIC, 0.7, (0, 255, 255), 2)
-
+            # cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 255), thickness=2)
+            # cv2.putText(img, f'area : {w * h}', (x, y - 10), cv2.FONT_ITALIC, 0.7, (0, 255, 255), 2)
+            cv2.drawContours(img, figureCntList[max_idx], -1, (0, 255, 255), 3)
             stacked_image = self.image_handler.stackImages(0.6, [imgResult, mask])
             cv2.imshow("image adn mask", stacked_image)
 
@@ -157,7 +163,7 @@ class FigureHandler:
         x, y, w, h = 0, 0, 0, 0
         figureTypeList = []  # 모든 contour
         figureTypeArea = []  # contour 주위 직사각형의 넓이. 가장 큰 하나의 contour를 구하기 위함.
-
+        figureCntList = []
         max_idx = -1
         figure_type = -1
         for cnt in contours:
@@ -172,12 +178,15 @@ class FigureHandler:
                 approx = cv2.approxPolyDP(cnt, 0.02 * peri, True)
                 objType = len(approx)
                 if count[figure.value][0] <= objType <= count[figure.value][1]:
-                    # if draw_contour:
-                    #     cv2.drawContours(img, cnt, -1, (0, 255, 255), 3)
                     # print("ok")
                     x, y, w, h = cv2.boundingRect(approx)
-                    figureTypeList.append(objType)
-                    figureTypeArea.append((x, y, w, h))
+
+                    # 삼각형이 짤리면 꼭짓점이 4개가 나와서 사각형을 방지할 수 있음
+                    # 이를 방지하기 위해서 x와 y가 0이 아닐 때만 추가
+                    if x!=0 and y!=0:
+                        figureTypeList.append(objType)
+                        figureTypeArea.append((x, y, w, h))
+                        figureCntList.append(cnt)
                 # if figure.value == Figure.TRI.value and objType == 3:
                 #     print('tri')
                 # elif count[figure.value][0]<=objType <= count[figure.value][1]:
@@ -200,8 +209,9 @@ class FigureHandler:
         if draw_contour and figure_type!=-1:
             cv2.rectangle(imgResult, (x, y), (x+w, y+h), (0, 255, 255), thickness=2)
             cv2.putText(imgResult, f'area : {w * h}', (x, y - 10), cv2.FONT_ITALIC, 0.7, (0, 255, 255), 2)
-            cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 255), thickness=2)
-            cv2.putText(img, f'area : {w * h}', (x, y - 10), cv2.FONT_ITALIC, 0.7, (0, 255, 255), 2)
+            # cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 255), thickness=2)
+            # cv2.putText(img, f'area : {w * h}', (x, y - 10), cv2.FONT_ITALIC, 0.7, (0, 255, 255), 2)
+            cv2.drawContours(img, figureCntList[-1], -1, (0, 255, 255), 3)
 
             stacked_image = self.image_handler.stackImages(0.6, [imgResult, mask])
             cv2.imshow("image adn mask", stacked_image)
@@ -278,10 +288,14 @@ class FigureHandler:
 
     def is_ring(self, color, figure, cropped_img):
         if self.check_ring_by_cnt(color, figure, cropped_img):
+            print("cnt : True")
             return True
         elif self.check_ring_by_area(color, figure, cropped_img):
+            print("area : True")
             return True
+        print("is_ring : false")
         return False
+
     def check_ring_by_cnt(self, color, figure, cropped_img):
         """
         가장 바깥쪽 contour 정보를 받아서 이 도형이 가운데가 비어있는 링 형태인지 반환.

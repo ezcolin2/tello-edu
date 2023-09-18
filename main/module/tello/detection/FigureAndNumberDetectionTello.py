@@ -165,6 +165,16 @@ class FigureAndNumberDetectionTello:
             contour_info, figureType = self.figure_handler.find_color_except_ring(img, color, Figure.ANY, 500, draw_contour=True)
             x, y, w, h = contour_info
 
+            try:
+                print('출력')
+                print(cam_width * (0.5 - self.range_params.find_range_percentage) <= x + w // 2 <= cam_width * (0.5 + self.range_params.find_range_percentage))
+                print(cam_height * (0.5 - self.range_params.find_range_percentage) <= y + h // 2 <= cam_height * (0.5 + self.range_params.find_range_percentage))
+                print(figureType)
+                print(w * h > self.range_params.min_area)
+                print(self.figure_handler.is_ring(color, Figure.RECTANGLE, img[y: y + h, x: x + w]))
+            except:
+                pass
+
             # 범위 안에 포함되어 있고 감지를 제대로 했으며 최소 면적을 넘고 사각형 링이 아니라는 것을 감지했다면
             if (
                     cam_width * (0.5 - self.range_params.find_range_percentage) <= x + w // 2 <= cam_width * (0.5 + self.range_params.find_range_percentage)

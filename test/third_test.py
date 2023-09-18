@@ -5,6 +5,7 @@ from main.module.params.RangeParams import RangeParams
 from main.module.params.CamParams import CamParams
 from main.module.tello.detection.NumberDetectionTello import NumberDetectionTello
 from main.module.tello.detection.FigureAndNumberDetectionTello import FigureAndNumberDetectionTello
+from main.module.tello.detection.RectangleRingDetection import RectangleRingDetection
 
 from main.module.enum.Color import *
 from main.module.enum.Direction import *
@@ -29,9 +30,13 @@ model.eval()  # 모델을 평가 모드로 설정
 cam_width = 640
 cam_height = 480
 cam_params = CamParams(cam_width, cam_height)
-pid_params = PIDParams([0.07, 0.07, 0], [0.2, 0.2, 0], [0.0001, 0.0001, 0])
-range_params = RangeParams([60000, 140000], [0.45 * cam_params.width, 0.55 * cam_params.height], 3000, 0.1, 0.1, 0.4)
+pid_params = PIDParams([0.08, 0.08, 0], [0.2, 0.2, 0], [0.0003, 0.0003, 0])
+range_params = RangeParams([20000, 60000], [0.45 * cam_params.width, 0.55 * cam_params.height], 1000, 0.1, 0.05, 0.3)
 number_handler = NumberHandler(model)
+
+pid_params_2 = PIDParams([0.13, 0.13, 0], [0.13, 0.13, 0], [0.0001, 0.0001, 0])
+range_params_2 = RangeParams([80000, 120000], [0.45 * cam_params.width, 0.55 * cam_params.height], 1000, 0.05, 0.01, 0.3)
+rectangle_ring_detection = RectangleRingDetection(tello, cam_params, pid_params_2, range_params_2, number_handler)
 
 figure_detection = FigureAndNumberDetectionTello(tello, cam_params, pid_params, range_params, number_handler)
 
@@ -52,13 +57,17 @@ def first(right, forward, color):
         frame_read = tello.get_frame_read()
         my_frame = frame_read.frame
         img = cv2.resize(my_frame + 30, (cam_width, cam_height))
-        contour_info, figure_type, = figure_detection.figure_handler.find_color(img, color, Figure.ANY, 500)
+        contour_info, figure_type, = figure_detection.figure_handler.find_color_except_ring(img, color, Figure.ANY, 500, draw_contour=True)
         if figure_type==4:
+            cv2.imwrite(f'{Color(color.value).name}_rectangle.png', img)
             break
 
         # 옆으로 이동
         tello.move_right(right)
         tello.move_forward(forward)
+
+        # 회전
+        tello.rotate_counter_clockwise(90)
 
         # 일단 아무거나 찾음
         figure_detection.move_until_find_figure(color, Direction.COUNTERCLOCKWISE, brightness=30)
@@ -107,6 +116,22 @@ def first(right, forward, color):
     # # figure_detection.tello_detection_with_rotate(color, brightness=30)
     # figure_detection.tello_detection_with_no_rotate(color, Figure.ANY, brightness=30)
 
+def second(color):
+    # 가로세로비율 맞춰서 찾음
+    rectangle_ring_detection.move_until_find(color, Figure.RECTANGLE, Direction.COUNTERCLOCKWISE, brightness=30)
+    rectangle_ring_detection.tello_detection_rectangle_ring_with_rotate(color, Figure.RECTANGLE, brightness=30, save=False, console=False)
+
+    # 중심 맞춤
+    rectangle_ring_detection.tello_detection_rectangle_ring_with_no_rotate(color, Figure.RECTANGLE, brightness=30, save=False)
+
+    # 링 통과
+    tello.move_down(40)
+    tello.move_forward(260)
+    tello.move_up(40)
+
+    # 180도 회전
+    tello.rotate_clockwise(180)
+
 
 # 연결
 tello.connect()
@@ -128,10 +153,12 @@ tello.streamon()
 tello.send_rc_control(0, 0, 0, 0)
 tello.takeoff()
 print('이륙')
-tello.move_up(60)
+tello.move_up(30)
 time.sleep(2)
 
-first(70, 60, Color.BLUE)
-first(70, 60, Color.GREEN)
-first(70, 60, Color.RED)
+first(90, 90, Color.BLUE)
+first(90, 90, Color.GREEN)
+first(90, 90, Color.RED)
+
+# second(Color.RED)
 tello.land()
