@@ -20,9 +20,9 @@ class FigureHandler:
         # HSV로 변환하면 grayscale로 바꿔주고 채널이 하나.
 
         # 빨간색이 감지가 잘 안 돼서 빨간색 감지할 때는 초록, 파랑색을 없앰
-        if color == Color.RED:
-            img[:] = self.image_handler.delete_specific_color(img, Color.BLUE)[:]
-            img[:] = self.image_handler.delete_specific_color(img, Color.GREEN)[:]
+        # if color == Color.RED:
+        #     img[:] = self.image_handler.delete_specific_color(img, Color.BLUE)[:]
+        #     img[:] = self.image_handler.delete_specific_color(img, Color.GREEN)[:]
 
         imgHSV = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
         lower = np.array([myColors[color.value][0:3]])
@@ -47,9 +47,9 @@ class FigureHandler:
         # HSV로 변환하면 grayscale로 바꿔주고 채널이 하나.
 
         # 빨간색이 감지가 잘 안 돼서 빨간색 감지할 때는 초록, 파랑색을 없앰
-        if color == Color.RED:
-            img[:] = self.image_handler.delete_specific_color(img, Color.BLUE)
-            img[:] = self.image_handler.delete_specific_color(img, Color.GREEN)
+        # if color == Color.RED:
+        #     img[:] = self.image_handler.delete_specific_color(img, Color.BLUE)
+        #     img[:] = self.image_handler.delete_specific_color(img, Color.GREEN)
 
         imgHSV = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
         lower = np.array([myColors[color.value][0:3]])
@@ -108,7 +108,7 @@ class FigureHandler:
             x, y, w, h = temp[-1]
 
             # 가장 큰 면적의 인덱스를 통해서 가장 큰 하나의 contour의 objType 알아내기
-            max_idx = figureTypeArea.index(temp[-1])
+            max_idx = figureTypeArea.index((x, y, w, h))
         if max_idx != -1:
             figure_type = figureTypeList[max_idx]
         if draw_contour and figure_type!=-1:
@@ -136,9 +136,9 @@ class FigureHandler:
         # HSV로 변환하면 grayscale로 바꿔주고 채널이 하나.
 
         # 빨간색이 감지가 잘 안 돼서 빨간색 감지할 때는 초록, 파랑색을 없앰
-        if color == Color.RED:
-            img = self.image_handler.delete_specific_color(img, Color.BLUE)
-            img = self.image_handler.delete_specific_color(img, Color.GREEN)
+        # if color == Color.RED:
+        #     img = self.image_handler.delete_specific_color(img, Color.BLUE)
+        #     img = self.image_handler.delete_specific_color(img, Color.GREEN)
 
         imgHSV = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
         lower = np.array([myColors[color.value][0:3]])
@@ -211,7 +211,7 @@ class FigureHandler:
             cv2.putText(imgResult, f'area : {w * h}', (x, y - 10), cv2.FONT_ITALIC, 0.7, (0, 255, 255), 2)
             # cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 255), thickness=2)
             # cv2.putText(img, f'area : {w * h}', (x, y - 10), cv2.FONT_ITALIC, 0.7, (0, 255, 255), 2)
-            cv2.drawContours(img, figureCntList[-1], -1, (0, 255, 255), 3)
+            cv2.drawContours(img, figureCntList[max_idx], -1, (0, 255, 255), 3)
 
             stacked_image = self.image_handler.stackImages(0.6, [imgResult, mask])
             cv2.imshow("image adn mask", stacked_image)
@@ -238,6 +238,8 @@ class FigureHandler:
             area = cv2.contourArea(cnt)
             area_list.append(area)
         area_list.sort()
+        if not area_list:
+            area_list.append(0)
         return area_list[-1]
 
 
@@ -317,7 +319,7 @@ class FigureHandler:
         # 자른 이미지에서 모든 contour를 구함.
         cropped_area = cropped_img.shape[0]*cropped_img.shape[1] #
         approx_list = self._get_all_contours(cropped_img, mask, figure, cropped_area*0.3)
-
+        print(f'개수 : {len(approx_list)}')
         # 가운데가 비어있다면 우선 바깥 contour와 안쪽 contour 두 개가 감지되어야 함
         if len(approx_list)==2:
             for approx in approx_list:
@@ -341,9 +343,7 @@ class FigureHandler:
         imgHSV = cv2.cvtColor(cropped_img, cv2.COLOR_BGR2HSV)
         lower = np.array([myColors[color.value][0:3]])
         upper = np.array([myColors[color.value][3:6]])
-        mask = cv2.inRange(imgHSV, lower, upper)
-        kernel = np.ones((5, 5), np.uint8)
-        mask = cv2.dilate(mask, kernel, iterations=2)
+
 
         # 가운데 작은 사각형으로 변경
         height = cropped_img.shape[0]
@@ -352,7 +352,11 @@ class FigureHandler:
         img_width = int(width * 0.5)
         cropped_img = cropped_img[(height - img_height) // 2:height - (height - img_height) // 2,
                       (width - img_width) // 2:width - (width - img_width) // 2]
-        cv2.imshow("cropped img", cropped_img)
+
+        mask = cv2.inRange(cropped_img, lower, upper)
+        kernel = np.ones((5, 5), np.uint8)
+        mask = cv2.dilate(mask, kernel, iterations=2)
+        cv2.imshow("adhadhha", mask)
 
         # 자른 이미지에서 모든 contour를 구함.
         cropped_area = cropped_img.shape[0] * cropped_img.shape[1]
@@ -363,7 +367,7 @@ class FigureHandler:
 
         # 가장 큰 contour의 면적 구함
         area = self._get_biggest_contour_area(cropped_img, mask, figure, 100, draw_contour=False)
-
+        print(area, w*h)
         # 반절 미만을 차지하면 링이라고 판단
         if area < w*h*0.5:
             return True

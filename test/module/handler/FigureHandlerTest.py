@@ -52,7 +52,7 @@ img3 = cv2.imread("images/img_1.png")
 contour_info, figure_type, = figure_handler.find_color(img3, Color.BLUE, Figure.ANY, 100, draw_contour=True)
 x, y, w, h = contour_info
 is_blue_ring = figure_handler.is_ring(Color.BLUE, Figure.ANY, img3[y : y+h, x : x+w])
-print(f'파란색 링 여부 : {is_blue_ring}, 정답 : True')
+print(f'파란색 링 여부 : {is_blue_ring}, 정답 : False')
 
 # 잘린 사각형 링 이미지 감지 테스트
 contour_info, figure_type, = figure_handler.find_color(img3, Color.GREEN, Figure.ANY, 100, draw_contour=True)
@@ -72,6 +72,8 @@ x, y, w, h = contour_info
 is_blue_ring = figure_handler.is_ring(Color.BLUE, Figure.ANY, img4[y : y+h, x : x+w])
 print(f'파란색 링 여부 : {is_blue_ring}, 정답 : False')
 
+
+
 contour_info, figure_type, = figure_handler.find_color(img4, Color.RED, Figure.ANY, 100, draw_contour=True)
 cv2.imshow("hello3", img4)
 
@@ -83,4 +85,12 @@ is_red_ring = figure_handler.is_ring(Color.RED, Figure.ANY, img5[y : y+h, x : x+
 print(is_red_ring)
 print(contour_info, figure_type)
 cv2.imshow("hello4", img5)
+
+img4 = cv2.imread("images/home-blue.png")
+
+# 파란 링 이미지 감지 테스트
+contour_info, figure_type, = figure_handler.find_color(img4, Color.BLUE, Figure.ANY, 100, draw_contour=True)
+x, y, w, h = contour_info
+is_blue_ring = figure_handler.is_ring(Color.BLUE, Figure.ANY, img4[y : y+h, x : x+w])
+print(f'파란색 링 여부 : {is_blue_ring}, 정답 : True')
 cv2.waitKey()
