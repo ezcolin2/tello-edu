@@ -31,10 +31,11 @@ class FigureHandler:
         kernel = np.ones((5, 5), np.uint8)
         mask = cv2.dilate(mask, kernel, iterations=3)
 
-        contour_info, objType = self._get_biggest_contour(img, mask, figure, min_area, draw_contour=draw_contour)
+        contour_info, objType = self._get_biggest_contour(img, mask, figure, min_area, draw_contour=draw_contour, show=True)
 
         return contour_info, objType
-    def find_color_except_ring(self, img, color, figure, min_area, draw_contour=False):
+
+    def find_color_except_ring(self, img, color, figure, min_area, draw_contour=False, show=False):
         """
         인자로 들어온 Color에 해당하는 도형이 있으면 (링 제외) 외접 사각형의 중심 좌표 반환
         코드 참조 : https://github.com/murtazahassan/Learn-OpenCV-in-3-hours
@@ -114,16 +115,104 @@ class FigureHandler:
         if draw_contour and figure_type!=-1:
             cv2.rectangle(imgResult, (x, y), (x+w, y+h), (0, 255, 255), thickness=2)
             cv2.putText(imgResult, f'area : {w * h}', (x, y - 10), cv2.FONT_ITALIC, 0.7, (0, 255, 255), 2)
-            # cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 255), thickness=2)
-            # cv2.putText(img, f'area : {w * h}', (x, y - 10), cv2.FONT_ITALIC, 0.7, (0, 255, 255), 2)
+            cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 255), thickness=2)
+            cv2.putText(img, f'area : {w * h}', (x, y - 10), cv2.FONT_ITALIC, 0.7, (0, 255, 255), 2)
             cv2.drawContours(img, figureCntList[max_idx], -1, (0, 255, 255), 3)
-            stacked_image = self.image_handler.stackImages(0.6, [imgResult, mask])
-            cv2.imshow("image adn mask", stacked_image)
+            stacked_image = self.image_handler.stackImages(0.6, [img, mask])
+            if show:
+                cv2.imshow("image adn mask", stacked_image)
+
+        return (x, y, w, h), figure_type
+    def find_color_with_ring(self, img, color, figure, min_area, draw_contour=False, show=False):
+        """
+        인자로 들어온 Color에 해당하는 도형이 있으면 (링 제외) 외접 사각형의 중심 좌표 반환
+        코드 참조 : https://github.com/murtazahassan/Learn-OpenCV-in-3-hours
+        :param img: 이미지 원본
+        :param color: Color enum
+        :return: contour 정보 (x, y, w, h)와 점 개수
+        """
+
+        # 이거는 BGR2HSV 사용해야 함.
+        # HSV로 변환하면 grayscale로 바꿔주고 채널이 하나.
+
+        # 빨간색이 감지가 잘 안 돼서 빨간색 감지할 때는 초록, 파랑색을 없앰
+        # if color == Color.RED:
+        #     img[:] = self.image_handler.delete_specific_color(img, Color.BLUE)
+        #     img[:] = self.image_handler.delete_specific_color(img, Color.GREEN)
+
+        imgHSV = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+        lower = np.array([myColors[color.value][0:3]])
+        upper = np.array([myColors[color.value][3:6]])
+        mask = cv2.inRange(imgHSV, lower, upper)
+        kernel = np.ones((5, 5), np.uint8)
+        mask = cv2.dilate(mask, kernel, iterations=1)
+
+
+        # (이미지, retrieval method) RETR_EXTERNAL은 outer detail을 찾거나 outer corner를 찾을 때 유용함.
+        contours, hierarchy = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+        imgResult = img.copy()
+        x, y, w, h = 0, 0, 0, 0
+        figureTypeList = []  # 모든 contour
+        figureTypeArea = []  # contour 주위 직사각형의 넓이. 가장 큰 하나의 contour를 구하기 위함.
+        figureCntList = []
+
+        max_idx = -1
+        figure_type = -1
+        for cnt in contours:
+            area = cv2.contourArea(cnt)
+            # minimum threshold를 정하면 noise를 줄일 수 있음
+            if area > min_area:  # area가 500보다 클 때만 contour 그리기
+                # 이미지 원본에 contour 그리기
+                # curve 길이 구하기
+                peri = cv2.arcLength(cnt, True)
+
+                # 점 위치
+                approx = cv2.approxPolyDP(cnt, 0.02 * peri, True)
+                objType = len(approx)
+                if count[figure.value][0] <= objType <= count[figure.value][1]:
+
+                    # print("ok")
+                    x_t, y_t, w_t, h_t = cv2.boundingRect(approx)
+
+                    # ring이rh 가로세로 비율이 일정 비율 이상일 때만 추가
+                    if self.is_ring(color, figure, img[y_t: y_t + h_t, x_t: x_t + w_t]) and w_t!=0 and h_t!=0 and min(w_t, h_t)/max(w_t, h_t)>=0.2:
+                        # if draw_contour:
+                        #     cv2.drawContours(img, cnt, -1, (0, 255, 255), 3)
+                        figureTypeList.append(objType)
+                        figureTypeArea.append((x_t, y_t, w_t, h_t))
+                        figureCntList.append(cnt)
+                # if figure.value == Figure.TRI.value and objType == 3:
+                #     print('tri')
+                # elif count[figure.value][0]<=objType <= count[figure.value][1]:
+                #     print(f'circle : {objType}')
+                #     print('circle')
+
+                # # 도형 주변에 표시하고 contour 정보 리스트에 추가
+                # cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 0), 2)
+
+        if len(figureTypeArea) != 0 and len(figureTypeList) != 0:
+            # 면적 큰 순으로 정렬
+            temp = sorted(figureTypeArea, key=lambda x: x[2] * x[3])
+            # 가장 큰 하나의 contour의 x, y, w, h 가져옴
+            x, y, w, h = temp[-1]
+
+            # 가장 큰 면적의 인덱스를 통해서 가장 큰 하나의 contour의 objType 알아내기
+            max_idx = figureTypeArea.index((x, y, w, h))
+        if max_idx != -1:
+            figure_type = figureTypeList[max_idx]
+        if draw_contour and figure_type!=-1:
+            cv2.rectangle(imgResult, (x, y), (x+w, y+h), (0, 255, 255), thickness=2)
+            cv2.putText(imgResult, f'area : {w * h}', (x, y - 10), cv2.FONT_ITALIC, 0.7, (0, 255, 255), 2)
+            cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 255), thickness=2)
+            cv2.putText(img, f'area : {w * h}', (x, y - 10), cv2.FONT_ITALIC, 0.7, (0, 255, 255), 2)
+            cv2.drawContours(img, figureCntList[max_idx], -1, (0, 255, 255), 3)
+            stacked_image = self.image_handler.stackImages(0.6, [img, mask])
+            if show:
+                cv2.imshow("image adn mask", stacked_image)
 
         return (x, y, w, h), figure_type
 
-
-    def find_color_with_all_contour(self, img, color, figure, min_area, draw_contour=False):
+    def find_color_with_all_contour(self, img, color, figure, min_area, draw_contour=False, show=False):
         """
         인자로 들어온 Color에 해당하는 도형이 있으면 approx의 리스트 반환
         코드 참조 : https://github.com/murtazahassan/Learn-OpenCV-in-3-hours
@@ -146,9 +235,9 @@ class FigureHandler:
         mask = cv2.inRange(imgHSV, lower, upper)
         kernel = np.ones((5, 5), np.uint8)
         mask = cv2.dilate(mask, kernel, iterations=2)
-        return self._get_all_contours(img, mask, figure, min_area, draw_contours=draw_contour)
+        return self._get_all_contours(img, mask, figure, min_area, draw_contours=draw_contour, show=show)
 
-    def _get_biggest_contour(self, img, mask, figure, min_area, draw_contour=True):
+    def _get_biggest_contour(self, img, mask, figure, min_area, draw_contour=True, show=True):
         """
         mask로부터 contour를 얻어내서 도형의 중심 좌표 반환
         하나의 도형만 감지
@@ -209,16 +298,17 @@ class FigureHandler:
         if draw_contour and figure_type!=-1:
             cv2.rectangle(imgResult, (x, y), (x+w, y+h), (0, 255, 255), thickness=2)
             cv2.putText(imgResult, f'area : {w * h}', (x, y - 10), cv2.FONT_ITALIC, 0.7, (0, 255, 255), 2)
-            # cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 255), thickness=2)
-            # cv2.putText(img, f'area : {w * h}', (x, y - 10), cv2.FONT_ITALIC, 0.7, (0, 255, 255), 2)
+            cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 255), thickness=2)
+            cv2.putText(img, f'area : {w * h}', (x, y - 10), cv2.FONT_ITALIC, 0.7, (0, 255, 255), 2)
             cv2.drawContours(img, figureCntList[max_idx], -1, (0, 255, 255), 3)
 
-            stacked_image = self.image_handler.stackImages(0.6, [imgResult, mask])
-            cv2.imshow("image adn mask", stacked_image)
+            stacked_image = self.image_handler.stackImages(0.6, [img, mask])
+            if show:
+                cv2.imshow("image adn mask", img)
 
         return (x, y, w, h), figure_type
 
-    def _get_biggest_contour_area(self, img, mask, figure, min_area, draw_contour=True):
+    def _get_biggest_contour_area(self, img, mask, figure, min_area, draw_contour=False):
         """
         mask로부터 contour를 얻어내서 가장 큰 contour의 넓이 반환
         하나의 도형만 감지
@@ -243,7 +333,7 @@ class FigureHandler:
         return area_list[-1]
 
 
-    def _get_all_contours(self, img, mask, figure, min_area, draw_contours=False):
+    def _get_all_contours(self, img, mask, figure, min_area, draw_contours=False, show=False):
         """
         원하는 도형의 특정 넓이 이상의 모든 contour를 외접 사각형(원본 x) 그려서 (x, y, w, h) 리스트 반환
         draw_contours가 True라면 이미지 원본에다 contour 그림
@@ -280,12 +370,15 @@ class FigureHandler:
                 x, y, w, h = cv2.boundingRect(app)
 
                 # 외접, 내접 사각형 그리기
-                cv2.rectangle(imgResult, (x, y), (x + w, y + h), (0, 255, 255), thickness=2)
-                cv2.putText(imgResult, f'area : {w*h}', (x, y-10,), cv2.FONT_ITALIC, 0.7, (0, 255, 255), 2)
+                # cv2.rectangle(imgResult, (x, y), (x + w, y + h), (0, 255, 255), thickness=2)
+                # cv2.putText(imgResult, f'area : {w*h}', (x, y-10,), cv2.FONT_ITALIC, 0.7, (0, 255, 255), 2)
+                # cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 255), thickness=2)
+                # cv2.putText(img, f'area : {w*h}', (x, y-10,), cv2.FONT_ITALIC, 0.7, (0, 255, 255), 2)
 
                 # contour 그리기
-                stacked_image = self.image_handler.stackImages(0.6, [imgResult, mask])
-                cv2.imshow("image adn mask", stacked_image)
+                stacked_image = self.image_handler.stackImages(0.6, [img, mask])
+                if show:
+                    cv2.imshow("image adn mask", img)
         return approx_list
 
     def is_ring(self, color, figure, cropped_img):
@@ -356,7 +449,6 @@ class FigureHandler:
         mask = cv2.inRange(cropped_img, lower, upper)
         kernel = np.ones((5, 5), np.uint8)
         mask = cv2.dilate(mask, kernel, iterations=2)
-        cv2.imshow("adhadhha", mask)
 
         # 자른 이미지에서 모든 contour를 구함.
         cropped_area = cropped_img.shape[0] * cropped_img.shape[1]
@@ -369,7 +461,7 @@ class FigureHandler:
         area = self._get_biggest_contour_area(cropped_img, mask, figure, 100, draw_contour=False)
         print(area, w*h)
         # 반절 미만을 차지하면 링이라고 판단
-        if area < w*h*0.5:
+        if area < w*h*0.8:
             return True
         else:
             return False

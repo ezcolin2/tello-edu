@@ -188,19 +188,26 @@ class TrackingTello:
         :return : 객체 중간 여부, error_lr, error_ud, error_fb
         """
         # pid 적용
+        print(f'is_aspect : {p_is_aspect}, aspect_ratio = {p_aspect_ratio}')
         x, y, w, h = contour_info
 
         p_lr, i_lr, d_lr = self.pid_params.pid_value_lr
         p_ud, i_ud, d_ud = self.pid_params.pid_value_ud
         p_fb, i_fb, d_fb = self.pid_params.pid_value_fb
+        fb_min_area = self.range_params.fb_range[0]
+        fb_max_area = self.range_params.fb_range[1]
         cam_width = self.cam_params.width
         cam_height = self.cam_params.height
 
         # contour 중심과 이미지 중심 좌표의 차이
         error_lr = x + w // 2 - cam_width // 2
-        speed_lr = p_lr * error_lr + i_lr * (error_lr - p_error_lr)
-        speed_lr = int(np.clip(speed_lr, -100, 100))
-
+        # speed_lr = p_lr * error_lr + i_lr * (error_lr - p_error_lr)
+        # speed_lr = int(np.clip(speed_lr, -100, 100))
+        speed_lr = -20
+        # if speed_lr < 0:
+        #     speed_lr = -20
+        # else:
+        #     speed_lr = 20
         # contour 중심과 이미지 중심 좌표의 차이
         error_ud = y + h // 2 - cam_height // 2
         speed_ud = p_ud * error_ud + i_ud * (error_ud - p_error_ud)
@@ -216,16 +223,18 @@ class TrackingTello:
         # 가로세로비
         aspect_ratio = 0
         if w != 0 and h != 0:
-            aspect_ratio = ((min(w, h)/max(w, h))*10)/10.0  # 가로 세로 비율을 소수점 첫 번째 자리까지만 표기
+            aspect_ratio = (int((min(w, h)/max(w, h))*100))/100.0  # 가로 세로 비율을 소수점 첫 번째 자리까지만 표기
 
 
         # fb = 0
         # 이미지의 width, height가 다르기 때문에 center_range_percentage를 조정함
         if (
             1.0 - self.range_params.aspect_ratio_percentage <= aspect_ratio <= 1.0 + self.range_params.aspect_ratio_percentage
+            # and
+            # fb_min_area <= area <= fb_max_area
         ):
             # if speed==0:
-            return True, error_lr, error_ud, error_fb
+            return True, error_lr, error_ud, error_fb, aspect_ratio, p_is_aspect
 
         # yaw 스피드
         # 이 코드가 실행된다는 것은 치우쳐 있다는 뜻
@@ -236,14 +245,21 @@ class TrackingTello:
 
         # is_aspect가 False면 회전 방향 변경
         if not is_aspect:
+            print('놓침')
+            print(x, y, w, h)
             speed_lr = -speed_lr
+        elif x==0 and y==0 and w==0 and h==0:
+            speed_lr = -speed_lr
+            speed_fb = 0
+            speed_ud = 0
 
         # 현재 가로세로 비율이 더 적다는 뜻은 지금 방향이 잘못되었다는 뜻
         # 다른 방향으로 간다면 is_aspect 변경해서 반환
         if aspect_ratio < p_aspect_ratio:
-            is_aspect = False
+            print('방향 변경')
+            is_aspect = not is_aspect
         else:
-            is_aspect = True
+            is_aspect = is_aspect
         # speed_yaw = 0
         # # 왼쪽에 존재하고 치우쳐 있다면 왼쪽 회전과 오른쪽 이동
         # if x+w//2<0.45*cam_width:
@@ -254,14 +270,14 @@ class TrackingTello:
         #     speed_lr = -abs(speed_lr)
         #
         # 벗어나면 멈춤
-        if x == 0 and y == 0 and w == 0 and h == 0:
-            speed_lr = 0
-            error_lr = 0
-            speed_ud = 0
-            error_ud = 0
-            speed_fb = 0
-            error_fb = 0
-        self.tello.send_rc_control(-speed_lr, -speed_fb, -speed_ud, speed_lr)
+        # if x == 0 and y == 0 and w == 0 and h == 0:
+        #     speed_lr = 0
+        #     error_lr = 0
+        #     speed_ud = 0
+        #     error_ud = 0
+        #     speed_fb = 0
+        #     error_fb = 0
+        self.tello.send_rc_control(-speed_lr*2, -speed_fb, -speed_ud, speed_lr)
         return False, error_lr, error_ud, error_fb, aspect_ratio, is_aspect
     def track_figure_with_no_rotate(
             self,

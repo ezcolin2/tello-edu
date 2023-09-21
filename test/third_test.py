@@ -35,8 +35,12 @@ range_params = RangeParams([20000, 60000], [0.45 * cam_params.width, 0.55 * cam_
 number_handler = NumberHandler(model)
 
 pid_params_2 = PIDParams([0.13, 0.13, 0], [0.13, 0.13, 0], [0.0003, 0.0003, 0])
-range_params_2 = RangeParams([80000, 120000], [0.45 * cam_params.width, 0.55 * cam_params.height], 1000, 0.05, 0.01, 0.3)
+range_params_2 = RangeParams([50000, 80000], [0.45 * cam_params.width, 0.55 * cam_params.height], 10000, 0.05, 0.1, 0.3)
 rectangle_ring_detection = RectangleRingDetection(tello, cam_params, pid_params_2, range_params_2, number_handler)
+
+pid_params_3 = PIDParams([0.13, 0.13, 0], [0.13, 0.13, 0], [0.0003, 0.0003, 0])
+range_params_3 = RangeParams([20000, 40000], [0.45 * cam_params.width, 0.55 * cam_params.height], 10000, 0.1, 0.1, 0.3)
+rectangle_ring_rotate_detection = RectangleRingDetection(tello, cam_params, pid_params_3, range_params_3, number_handler)
 
 figure_detection = FigureAndNumberDetectionTello(tello, cam_params, pid_params, range_params, number_handler)
 
@@ -123,13 +127,18 @@ def first(right, forward, color):
     # # figure_detection.tello_detection_with_rotate(color, brightness=30)
     # figure_detection.tello_detection_with_no_rotate(color, Figure.ANY, brightness=30)
 
-def second(color):
-    # 가로세로비율 맞춰서 찾음
-    rectangle_ring_detection.move_until_find(color, Figure.ANY, Direction.COUNTERCLOCKWISE, brightness=30)
-    # rectangle_ring_detection.tello_detection_rectangle_ring_with_rotate(color, Figure.RECTANGLE, brightness=30, save=False, console=False)
+def second(number, r_x, b_x):
+    """
 
-    # 중심 맞춤
-    rectangle_ring_detection.tello_detection_rectangle_ring_with_no_rotate(color, Figure.ANY, brightness=30, save=True)
+    :param number: 그 다음 찾아야하는 숫자
+    :return:
+    """
+    # 가로세로비율 맞춰서 찾음
+    rectangle_ring_detection.move_until_find(Color.RED, Figure.ANY, Direction.COUNTERCLOCKWISE, brightness=30)
+    rectangle_ring_detection.tello_detection_rectangle_ring_with_rotate(Color.RED, Figure.RECTANGLE, brightness=30, save=False, console=False)
+
+    # 중심 맞추고 사진 저장
+    rectangle_ring_detection.tello_detection_rectangle_ring_with_no_rotate(Color.RED, Figure.ANY, brightness=30, save=True)
 
     # 링 통과
     tello.move_down(40)
@@ -138,6 +147,90 @@ def second(color):
 
     # 180도 회전
     tello.rotate_clockwise(180)
+
+    # 숫자 판단
+    frame_read = tello.get_frame_read()
+    my_frame = frame_read.frame
+    img = cv2.resize(my_frame + 30, (cam_width, cam_height))
+    predicted, contour_info, = rectangle_ring_detection.find_number_and_contour_info_with_color_rectangle(img ,Color.RED)
+
+    # 만약 빨간색 링 아래 숫자가 찾아야 할 숫자라면
+    if predicted == number:
+        # 숫자 저장
+        rectangle_ring_detection.find_number_and_contour_info_with_color_rectangle(img, Color.RED, save=True, rectangle_contour=False)
+        # 중심 맞춤
+        rectangle_ring_detection.tello_detection_rectangle_ring_with_no_rotate(Color.RED, Figure.ANY, brightness=30, save=False)
+
+        # 링 통과
+        tello.move_down(40)
+        tello.move_forward(260)
+        tello.move_up(40)
+
+        # 180도 회전
+        tello.rotate_clockwise(180)
+
+        # 빨간색 링이 왼쪽에 있다면 파란색 링을 찾기 위해 오른쪽으로 이동
+        direction = Direction.RIGHT
+        # 빨간색 링이 오른쪽에 있다면 파란색 링을 찾기 위해 왼쪽으로 이동
+        if r_x > b_x:
+            direction = Direction.LEFT
+
+        # 파란색 링이 있는 쪽으로 이동
+        rectangle_ring_detection.move_until_find(Color.BLUE, Figure.ANY, Direction.RIGHT)
+
+        # 중심 맞추고 사진 저장
+        rectangle_ring_detection.tello_detection_rectangle_ring_with_no_rotate(Color.RED, Figure.ANY, brightness=30, save=True)
+
+        # 링 통과
+        tello.move_down(40)
+        tello.move_forward(260)
+        tello.move_up(40)
+    # 만약 빨간색 링 아래의 숫자가 찾아야 할 숫자가 아니라면
+    else:
+        # 여기부터는 반대편
+        # 빨간색 링이 오른쪽에 있다면 파란색 링을 찾기 위해 오른쪽으로 이동
+        direction = Direction.RIGHT
+        # 빨간색 링이 왼쪽에 있다면 파란색 링을 찾기 위해 왼쪽으로 이동
+        if r_x < b_x:
+            direction = Direction.LEFT
+
+        # 파란색 링이 있는 쪽으로 이동
+        rectangle_ring_detection.move_until_find(Color.BLUE, Figure.ANY, Direction.RIGHT)
+
+        # 숫자 저장
+        rectangle_ring_detection.find_number_and_contour_info_with_color_rectangle(img, Color.RED, save=True, rectangle_contour=False)
+
+        # 중심 맞춤
+        rectangle_ring_detection.tello_detection_rectangle_ring_with_no_rotate(Color.BLUE, Figure.ANY, brightness=30, save=False)
+
+        # 링 통과
+        tello.move_down(40)
+        tello.move_forward(260)
+        tello.move_up(40)
+        # 180도 회전
+        tello.rotate_clockwise(180)
+
+        # 중심 맞추고 사진 저장
+        rectangle_ring_detection.tello_detection_rectangle_ring_with_no_rotate(Color.BLUE, Figure.ANY, brightness=30, save=True)
+
+        # 링 통과
+        tello.move_down(40)
+        tello.move_forward(260)
+        tello.move_up(40)
+def get_ring_location():
+    """
+    빨간색 링과 파란색 링을 찾아서 위치를 알아내는 함수
+    :return: r_x, b_x
+    """
+    frame_read = tello.get_frame_read()
+    my_frame = frame_read.frame
+    img = cv2.resize(my_frame + 30, (cam_width, cam_height))
+    red_contour_info, _, = rectangle_ring_detection.figure_handler.find_color_with_ring(img, Color.RED, Figure.ANY, 1000)
+    blue_contour_info, _, = rectangle_ring_detection.figure_handler.find_color_with_ring(img, Color.BLUE, Figure.ANY, 1000)
+
+    r_x = red_contour_info[0]
+    b_x = blue_contour_info[0]
+    return r_x, b_x
 
 
 # 연결
@@ -160,12 +253,25 @@ tello.streamon()
 tello.send_rc_control(0, 0, 0, 0)
 tello.takeoff()
 print('이륙')
-tello.move_up(60)
+tello.move_up(80)
+print('상승 완료')
 time.sleep(2)
 
 # first(90, 90, Color.BLUE)
 # first(90, 90, Color.GREEN)
 # first(90, 90, Color.RED)
 
-second(Color.BLUE)
+# second(Color.BLUE)
+
+rectangle_ring_detection.move_until_find(Color.RED, Figure.ANY, Direction.COUNTERCLOCKWISE, brightness=30)
+rectangle_ring_rotate_detection.tello_detection_rectangle_ring_with_rotate_v2(Color.RED, Figure.RECTANGLE, brightness=30, save=False, console=False)
+print('중심 맞춤')
+
+# 중심 맞추고 사진 저장
+rectangle_ring_detection.tello_detection_rectangle_ring_with_no_rotate(Color.RED, Figure.ANY, brightness=30, save=True)
+
+# 링 통과
+tello.move_down(40)
+tello.move_forward(240)
+tello.move_up(40)
 tello.land()

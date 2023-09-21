@@ -89,7 +89,7 @@ cv2.imshow("hello4", img5)
 img4 = cv2.imread("images/home-blue.png")
 
 # 파란 링 이미지 감지 테스트
-contour_info, figure_type, = figure_handler.find_color(img4, Color.BLUE, Figure.ANY, 100, draw_contour=True)
+contour_info, figure_type, = figure_handler.find_color_with_ring(img4, Color.BLUE, Figure.ANY, 100, draw_contour=True)
 x, y, w, h = contour_info
 is_blue_ring = figure_handler.is_ring(Color.BLUE, Figure.ANY, img4[y : y+h, x : x+w])
 print(f'파란색 링 여부 : {is_blue_ring}, 정답 : True')

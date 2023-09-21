@@ -57,11 +57,11 @@ class RectangleRingDetection:
                     x_temp, y_temp, w_temp, h_temp = cv2.boundingRect(approx)
 
                     # 감지한 contour 중 ring이 있다면 그 값을 저장
-                    if self.figure_handler.is_ring(color, figure, img[x_temp:x_temp + w_temp][y_temp:y_temp + h_temp]):
+                    if self.figure_handler.is_ring(color, figure, img[x_temp:x_temp + w_temp, y_temp:y_temp + h_temp]):
                         x, y, w, h = x_temp, y_temp, w_temp, h_temp
 
                         # rectangle ring에만 contour를 그림
-                        approx_list_ring = self.figure_handler.find_color_with_all_contour(img[x_temp:x_temp+w_temp][y_temp:y_temp+h_temp], color, figure, 10000, draw_contour=True)
+                        approx_list_ring = self.figure_handler.find_color_with_all_contour(img[x_temp:x_temp+w_temp, y_temp:y_temp+h_temp], color, figure, 10000, draw_contour=True)
 
                         # 외접, 내접 contour도 그리기
                     for i in approx:
@@ -69,7 +69,7 @@ class RectangleRingDetection:
             # contour_info, figure_type = self.figure_handler.find_color(img, color, figure, 500)
             contour_info = (x, y, w, h)
             # 객체 가운데로
-            success, p_error, = self.tracking_tello.track_figure_with_rotate(contour_info, p_error, same_ratio=True)
+            success, p_error, = self.tracking_tello.track_figure_with_rotate(contour_info, p_error)
 
             # 가운데로 왔고 저장을 하고 싶다면 이미지 저장
             if success and save:
@@ -134,15 +134,15 @@ class RectangleRingDetection:
             if x!=0 and y !=0 and w!=0 and h!=0:
                 if not self.figure_handler.is_ring(color, figure, img[y:y + h, x:x + w]):
                     continue
-            else:
-                continue
-
-            # rectangle ring에만 contour를 그림
-            approx_list_ring = self.figure_handler.find_color_with_all_contour(img[y:y + h, x:x + w], color, figure, 10000, draw_contour=True)
-
+            # else:
+            #     continue
 
             # 객체 가운데로
             success, p_error_lr, p_error_ud, p_error_fb, p_aspect_ratio, p_is_aspect = self.tracking_tello.track_figure_with_rotate_v2(contour_info, p_error_lr, p_error_ud, p_error_fb, p_aspect_ratio, p_is_aspect)
+            # rectangle ring에만 contour를 그림
+            # approx_list_ring = self.figure_handler.find_color_with_all_contour(img[y:y + h, x:x + w], color, figure, 10000, draw_contour=True)
+
+
 
             # 가운데로 왔고 저장을 하고 싶다면 이미지 저장
             if success and save:
@@ -170,6 +170,9 @@ class RectangleRingDetection:
                     elif figure == Figure.TRI:
                         print('Back')
                     break
+                print('도형 감지 성공')
+                break
+            elif success:
                 print('도형 감지 성공')
                 break
             # q를 누르면 무한 반복에서 빠져나옴
@@ -202,7 +205,7 @@ class RectangleRingDetection:
             my_frame = frame_read.frame
             img = cv2.resize(my_frame + brightness, (cam_width, cam_height))
             # 모든 contour를 찾고나면 이 중에서 rectangle ring을 걸러내야하기 때문에 contour를 그리지는 않는다.
-            approx_list = self.figure_handler.find_color_with_all_contour(img, color, figure, min_area, draw_contour=False)
+            approx_list = self.figure_handler.find_color_with_all_contour(img, color, figure, min_area, draw_contour=True, show=True)
             if approx_list:
                 for approx in approx_list:
                     x_temp, y_temp, w_temp, h_temp = cv2.boundingRect(approx)
@@ -212,7 +215,7 @@ class RectangleRingDetection:
                         x, y, w, h = x_temp, y_temp, w_temp, h_temp
 
                         # rectangle ring에만 contour를 그림
-                        approx_list_ring = self.figure_handler.find_color_with_all_contour(img[y_temp:y_temp+h_temp+1, x_temp:x_temp+w_temp+1], color, figure, min_area, draw_contour=True)
+                        approx_list_ring = self.figure_handler.find_color_with_all_contour(img[y_temp:y_temp+h_temp+1, x_temp:x_temp+w_temp+1], color, figure, min_area, draw_contour=True, show=False)
 
                         # 외접, 내접 contour도 그리기
                     for i in approx:
@@ -384,7 +387,7 @@ class RectangleRingDetection:
         :param color: Color Enum 타입
         :param save: 숫자 이미지 저장 여부
 
-        :return: 숫자
+        :return: 숫자, (x, y, w, h)
         """
         min_area = self.range_params.min_area
 
