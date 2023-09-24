@@ -77,17 +77,17 @@ next = 9
 
 
 # 첫 번째 색 찾을 때까지 회전
-rectangle_ring_detection.move_until_find(Color.BLUE, Figure.ANY, Direction.COUNTERCLOCKWISE, brightness=30)
+rectangle_ring_detection.move_until_find(Color.RED_REC, Figure.ANY, Direction.COUNTERCLOCKWISE, brightness=30)
 # rectangle_ring_detection.tello_detection_rectangle_ring_with_no_rotate(Color.RED, Figure.ANY, brightness=30)
 
 # 회전하면서 정면을 봄
-rectangle_ring_rotate_detection.tello_detection_rectangle_ring_with_rotate_v3(Color.BLUE, Figure.RECTANGLE, brightness=30,
+rectangle_ring_rotate_detection.tello_detection_rectangle_ring_with_rotate_v3(Color.RED_REC, Figure.RECTANGLE, brightness=30,
                                                                               save=False, console=False)
 
 print('중심 맞춤')
 
 # 중심 맞추고 사진 저장
-rectangle_ring_rotate_detection.tello_detection_rectangle_ring_with_no_rotate(Color.BLUE, Figure.ANY, brightness=30,
+rectangle_ring_rotate_detection.tello_detection_rectangle_ring_with_no_rotate(Color.RED_REC, Figure.ANY, brightness=30,
                                                                               save=True)
 
 # 링 통과
@@ -101,7 +101,10 @@ time.sleep(1)
 frame_read = tello.get_frame_read()
 my_frame = frame_read.frame
 img = cv2.resize(my_frame + 30, (cam_width, cam_height))
-find_num, contour_info = rectangle_ring_detection.find_number_and_contour_info_with_color_rectangle(img, Color.BLUE, save=True, rectangle_contour=False)
+
+# 숫자 찾을 때는 파란색 제거하지 않기
+# 가끔 검은색 숫자가 사라질 때가 있음
+find_num, contour_info = rectangle_ring_detection.find_number_and_contour_info_with_color_rectangle(img, Color.RED, save=True, rectangle_contour=False)
 a, b, c, d = contour_info
 img_temp = img.copy()
 cv2.putText(img_temp, str(find_num), (a+c//2, b-10), cv2.FONT_ITALIC, 1.5, (0, 255, 255), 2)
@@ -110,10 +113,10 @@ print(f'blue number : {find_num}')
 # 바로 앞에 있는 것이 찾는 숫자가 아닐 때
 if next!=find_num:
     # 다른 애 찾기
-    rectangle_ring_detection.move_until_find(Color.RED_REC, Figure.ANY, Direction.COUNTERCLOCKWISE, brightness=30)
+    rectangle_ring_detection.move_until_find(Color.BLUE, Figure.ANY, Direction.COUNTERCLOCKWISE, brightness=30)
 
     # 정면 보도록 회전
-    rectangle_ring_rotate_detection.tello_detection_rectangle_ring_with_rotate_v3(Color.RED_REC, Figure.RECTANGLE,
+    rectangle_ring_rotate_detection.tello_detection_rectangle_ring_with_rotate_v3(Color.BLUE, Figure.RECTANGLE,
                                                                                   brightness=30,
                                                                                   save=True, console=False)
     print('중심 맞춤')
@@ -124,7 +127,7 @@ if next!=find_num:
     find_num, _ = rectangle_ring_detection.find_number_and_contour_info_with_color_rectangle(img, Color.BLUE, save=True,
                                                                                              rectangle_contour=False)
 
-    rectangle_ring_rotate_detection.tello_detection_rectangle_ring_with_no_rotate(Color.RED_REC, Figure.ANY, brightness=30,
+    rectangle_ring_rotate_detection.tello_detection_rectangle_ring_with_no_rotate(Color.BLUE, Figure.ANY, brightness=30,
                                                                                   save=False)
     # 링 통과
     tello.move_down(30)
@@ -132,7 +135,7 @@ if next!=find_num:
     tello.move_up(30)
     tello.rotate_clockwise(180)
     # 그 다음 마지막으로 통과하기
-    rectangle_ring_rotate_detection.tello_detection_rectangle_ring_with_no_rotate(Color.RED_REC, Figure.ANY, brightness=30,
+    rectangle_ring_rotate_detection.tello_detection_rectangle_ring_with_no_rotate(Color.BLUE, Figure.ANY, brightness=30,
                                                                                   save=True)
 
 # 찾는 숫자가 맞다면 회전 안하고 바로 통과
@@ -143,7 +146,7 @@ else:
     cv2.imwrite("number.png", img)
 
     # 회전 안하고 중심 맞춤
-    rectangle_ring_rotate_detection.tello_detection_rectangle_ring_with_no_rotate(Color.BLUE, Figure.ANY, brightness=30,
+    rectangle_ring_rotate_detection.tello_detection_rectangle_ring_with_no_rotate(Color.RED_REC, Figure.ANY, brightness=30,
                                                                                   save=False)
     # 링 통과
     tello.move_down(30)
@@ -152,16 +155,16 @@ else:
     tello.rotate_clockwise(180)
 
     # 다른 애 찾기
-    rectangle_ring_detection.move_until_find(Color.RED_REC, Figure.ANY, Direction.COUNTERCLOCKWISE, brightness=30)
+    rectangle_ring_detection.move_until_find(Color.BLUE, Figure.ANY, Direction.COUNTERCLOCKWISE, brightness=30)
 
     # 정면 보도록 회전
-    rectangle_ring_rotate_detection.tello_detection_rectangle_ring_with_rotate_v3(Color.RED_REC, Figure.RECTANGLE,
+    rectangle_ring_rotate_detection.tello_detection_rectangle_ring_with_rotate_v3(Color.BLUE, Figure.RECTANGLE,
                                                                                   brightness=30,
                                                                                   save=False, console=False)
     print('중심 맞춤')
 
 
-    rectangle_ring_rotate_detection.tello_detection_rectangle_ring_with_no_rotate(Color.RED_REC, Figure.ANY,
+    rectangle_ring_rotate_detection.tello_detection_rectangle_ring_with_no_rotate(Color.BLUE, Figure.ANY,
                                                                                   brightness=30,
                                                                                   save=True)
     # 링 통과
