@@ -28,13 +28,7 @@ number_handler = NumberHandler(model)
 
 figure_detection = FigureAndNumberDetectionTello(None, cam_params, pid_params, range_params, number_handler)
 
-# 숫자 이미지 파일
-one_img = cv2.imread("images/09-15.png")
-res, contour_info, = figure_detection.find_number_and_contour_info_with_color(one_img, Color.RED, save=True)
-x, y, w, h = contour_info
-cv2.rectangle(one_img, (x, y), (x+w, y+h), (0, 255, 255), thickness=3)
-cv2.imshow("hello", one_img)
-print(res)
+
 cv2.waitKey()
 # (x, y, w, h), predicted = number_handler.find_biggest_number(one_img, 500)
 # cv2.rectangle(one_img, (x, y), (x+w, y+h), (255, 0, 0), 2)

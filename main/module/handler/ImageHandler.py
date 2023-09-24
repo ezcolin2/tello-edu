@@ -77,7 +77,7 @@ class ImageHandler:
         hsv_image = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
         # 커널
-        kernel = np.ones((5, 5), np.uint8)
+        kernel = np.ones((3, 3), np.uint8)
 
         # HSV 범위
         lower_color = np.array(myColors[color.value][:3])
@@ -87,7 +87,7 @@ class ImageHandler:
         mask = cv2.inRange(hsv_image, lower_color, upper_color)
 
         # 노이즈 제거
-        dilated_mask = cv2.dilate(mask, kernel, iterations=10)
+        dilated_mask = cv2.dilate(mask, kernel, iterations=2)
 
         temp_img = np.copy(img)
 

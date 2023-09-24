@@ -61,7 +61,7 @@ class FigureAndNumberDetectionTello:
             frame_read = self.tello.get_frame_read()
             my_frame = frame_read.frame
             img = cv2.resize(my_frame + brightness, (cam_width, cam_height))
-            contour_info, figure_type = self.figure_handler.find_color_except_ring(img, color, Figure.ANY, min_area, draw_contour=True)
+            contour_info, figure_type = self.figure_handler.find_color_except_ring(img, color, Figure.ANY, min_area, draw_contour=True, show=True)
             x, y, w, h = contour_info
             # 객체 가운데로
             success, p_error_lr, p_error_ud, p_error_fb = self.tracking_tello.track_figure_with_rotate(contour_info, p_error_lr, p_error_ud, p_error_fb)
@@ -99,7 +99,7 @@ class FigureAndNumberDetectionTello:
             my_frame = frame_read.frame
             img = cv2.resize(my_frame + brightness, (cam_width, cam_height))
 
-            contour_info, figure_type = self.figure_handler.find_color_except_ring(img, color, figure, min_area, draw_contour=True)
+            contour_info, figure_type = self.figure_handler.find_color_except_ring(img, color, figure, min_area, draw_contour=True, show=True)
             x, y, w, h = contour_info
 
             # 너무 가까이 가면 contour를 감지 못 하기 때문에 뒤로 이동

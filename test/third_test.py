@@ -31,15 +31,15 @@ cam_width = 640
 cam_height = 480
 cam_params = CamParams(cam_width, cam_height)
 pid_params = PIDParams([0.08, 0.08, 0], [0.2, 0.2, 0], [0.0003, 0.0003, 0])
-range_params = RangeParams([20000, 60000], [0.45 * cam_params.width, 0.55 * cam_params.height], 1000, 0.1, 0.01, 0.3)
+range_params = RangeParams([20000, 60000], [0.45 * cam_params.width, 0.55 * cam_params.height], 1000, 0.1, 0.1, 0.3)
 number_handler = NumberHandler(model)
 
 pid_params_2 = PIDParams([0.13, 0.13, 0], [0.13, 0.13, 0], [0.0003, 0.0003, 0])
-range_params_2 = RangeParams([50000, 80000], [0.45 * cam_params.width, 0.55 * cam_params.height], 10000, 0.05, 0.1, 0.3)
+range_params_2 = RangeParams([50000, 80000], [0.45 * cam_params.width, 0.55 * cam_params.height], 1000, 0.05, 0.1, 0.3)
 rectangle_ring_detection = RectangleRingDetection(tello, cam_params, pid_params_2, range_params_2, number_handler)
 
 pid_params_3 = PIDParams([0.13, 0.13, 0], [0.13, 0.13, 0], [0.0003, 0.0003, 0])
-range_params_3 = RangeParams([20000, 40000], [0.45 * cam_params.width, 0.55 * cam_params.height], 10000, 0.1, 0.1, 0.3)
+range_params_3 = RangeParams([20000, 40000], [0.45 * cam_params.width, 0.55 * cam_params.height], 1000, 0.1, 0.1, 0.3)
 rectangle_ring_rotate_detection = RectangleRingDetection(tello, cam_params, pid_params_3, range_params_3, number_handler)
 
 figure_detection = FigureAndNumberDetectionTello(tello, cam_params, pid_params, range_params, number_handler)
@@ -61,13 +61,14 @@ def first(right, forward, color):
         frame_read = tello.get_frame_read()
         my_frame = frame_read.frame
         img = cv2.resize(my_frame + 30, (cam_width, cam_height))
-        contour_info, figure_type, = figure_detection.figure_handler.find_color_except_ring(img, color, Figure.RECTANGLE, 500, draw_contour=True)
+        contour_info, figure_type, = figure_detection.figure_handler.find_color_except_ring(img, color, Figure.ANY, 500, draw_contour=True, show=True)
+        print(f'figure type : {figure_type}')
         if figure_type==4:
             cv2.imwrite(f'{Color(color.value).name}_rectangle.png', img)
             break
         elif figure_type==3:
             tello.move_up(40)
-            tello.move_forward(120)
+            tello.move_forward(160)
             tello.move_down(40)
             tello.rotate_clockwise(180)
             continue
@@ -253,25 +254,28 @@ tello.streamon()
 tello.send_rc_control(0, 0, 0, 0)
 tello.takeoff()
 print('이륙')
-tello.move_up(80)
+# tello.move_up(80)
 print('상승 완료')
+# tello.rotate_clockwise(180)
 time.sleep(2)
 
-# first(90, 90, Color.BLUE)
-# first(90, 90, Color.GREEN)
-# first(90, 90, Color.RED)
-
+first(90, 90, Color.BLUE)
+first(90, 90, Color.GREEN)
+first(90, 90, Color.RED_REC)
+tello.move_up(60)
+tello.move_forward(100)
 # second(Color.BLUE)
 
-rectangle_ring_detection.move_until_find(Color.RED, Figure.ANY, Direction.COUNTERCLOCKWISE, brightness=30)
-rectangle_ring_rotate_detection.tello_detection_rectangle_ring_with_rotate_v2(Color.RED, Figure.RECTANGLE, brightness=30, save=False, console=False)
+rectangle_ring_detection.move_until_find(Color.RED_REC, Figure.ANY, Direction.COUNTERCLOCKWISE, brightness=30)
+rectangle_ring_rotate_detection.tello_detection_rectangle_ring_with_rotate_v2(Color.RED_REC, Figure.RECTANGLE, brightness=30, save=False, console=False)
 print('중심 맞춤')
 
 # 중심 맞추고 사진 저장
-rectangle_ring_detection.tello_detection_rectangle_ring_with_no_rotate(Color.RED, Figure.ANY, brightness=30, save=True)
+rectangle_ring_detection.tello_detection_rectangle_ring_with_no_rotate(Color.RED_REC, Figure.ANY, brightness=30, save=True)
 
 # 링 통과
 tello.move_down(40)
 tello.move_forward(240)
 tello.move_up(40)
 tello.land()
+
