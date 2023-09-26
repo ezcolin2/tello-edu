@@ -364,7 +364,6 @@ class FigureHandler:
         if approx_list:
             for app in approx_list:
                 x, y, w, h = cv2.boundingRect(app)
-                print('hello')
                 # 외접, 내접 사각형 그리기
                 # cv2.rectangle(imgResult, (x, y), (x + w, y + h), (0, 255, 255), thickness=2)
                 # cv2.putText(imgResult, f'area : {w*h}', (x, y-10,), cv2.FONT_ITALIC, 0.7, (0, 255, 255), 2)

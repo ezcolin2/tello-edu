@@ -63,7 +63,7 @@ range_params = RangeParams([20000, 60000], [0.45 * cam_params.width, 0.55 * cam_
 # pid_params_3 = PIDParams([0.13, 0.13, 0], [0.13, 0.13, 0], [0.0003, 0.0003, 0])
 # range_params_3 = RangeParams([20000, 40000], [0.45 * cam_params.width, 0.55 * cam_params.height], 1000, 0.1, 0.1, 0.3)
 # rectangle_ring_rotate_detection = RectangleRingDetection(tello, cam_params, pid_params_3, range_params_3, number_handler)
-pid_params_2 = PIDParams([0.1, 0.1, 0], [0.13, 0.13, 0], [0.0003, 0.0003, 0])
+pid_params_2 = PIDParams([0.1, 0.1, 0], [0.13, 0.13, 0], [0.0005, 0.0005, 0])
 range_params_2 = RangeParams([10000, 40000], [0.45 * cam_params.width, 0.55 * cam_params.height], 3000, 0.03, 1.0, 0.35)
 rectangle_ring_detection = RectangleRingDetection(tello, cam_params, pid_params_2, range_params_2, number_handler)
 
@@ -139,7 +139,7 @@ def first(right, forward, color):
     frame_read = tello.get_frame_read()
     my_frame = frame_read.frame
     img = cv2.resize(my_frame + 30, (cam_width, cam_height))
-    predicted, _ = figure_detection.find_number_and_contour_info_with_color(img, color, save=True, rectangle_contour=True)
+    predicted, _ = figure_detection.find_number_and_contour_info_with_color(img, color, save=False, rectangle_contour=True)
     # _, predicted = number_detection.number_handler.find_biggest_number(img, 500)
     print(f'예측값 : {predicted}')
     return predicted
@@ -147,10 +147,10 @@ def first(right, forward, color):
 def second(next):
 
     # 첫 번째 색 찾을 때까지 회전
-    p_aspect_ratio = rectangle_ring_detection.move_until_find(Color.RED_REC, Figure.ANY, Direction.COUNTERCLOCKWISE, brightness=30)
-    # rectangle_ring_detection.tello_detection_rectangle_ring_with_no_rotate(Color.RED, Figure.ANY, brightness=30)
+    rectangle_ring_detection.move_until_find(Color.RED_REC, Figure.ANY, Direction.COUNTERCLOCKWISE, brightness=30)
 
     # 회전하면서 정면을 봄
+    p_aspect_ratio = rectangle_ring_detection.tello_detection_square_ring_with_no_rotate(Color.RED_REC, Figure.ANY, brightness=30)
     rectangle_ring_rotate_detection.tello_detection_rectangle_ring_with_rotate_v3(Color.RED_REC, Figure.RECTANGLE, p_aspect_ratio,brightness=30,
                                                                                   save=False, console=False)
 
@@ -162,7 +162,7 @@ def second(next):
 
     # 링 통과
     tello.move_down(30)
-    tello.move_forward(220)
+    tello.move_forward(260)
     tello.rotate_clockwise(180)
     time.sleep(1)
 
@@ -182,9 +182,10 @@ def second(next):
     # 바로 앞에 있는 것이 찾는 숫자가 아닐 때
     if next!=find_num:
         # 다른 애 찾기
-        p_aspect_ratio = rectangle_ring_detection.move_until_find(Color.BLUE, Figure.ANY, Direction.COUNTERCLOCKWISE, brightness=30)
+        rectangle_ring_detection.move_until_find(Color.BLUE, Figure.ANY, Direction.COUNTERCLOCKWISE, brightness=30)
 
         # 정면 보도록 회전
+        p_aspect_ratio = rectangle_ring_detection.tello_detection_square_ring_with_no_rotate(Color.BLUE, Figure.ANY, brightness=30)
         rectangle_ring_rotate_detection.tello_detection_rectangle_ring_with_rotate_v3(Color.BLUE, Figure.RECTANGLE, p_aspect_ratio,
                                                                                       brightness=30,
                                                                                       save=False, console=False)
@@ -230,9 +231,10 @@ def second(next):
         tello.rotate_clockwise(180)
 
         # 다른 애 찾기
-        p_aspect_ratio = rectangle_ring_detection.move_until_find(Color.BLUE, Figure.ANY, Direction.COUNTERCLOCKWISE, brightness=30)
+        rectangle_ring_detection.move_until_find(Color.BLUE, Figure.ANY, Direction.COUNTERCLOCKWISE, brightness=30)
 
         # 정면 보도록 회전
+        p_aspect_ratio = rectangle_ring_detection.tello_detection_square_ring_with_no_rotate(Color.BLUE, Figure.ANY, brightness=30)
         rectangle_ring_rotate_detection.tello_detection_rectangle_ring_with_rotate_v3(Color.BLUE, Figure.RECTANGLE,p_aspect_ratio,
                                                                                       brightness=30,
                                                                                       save=False, console=False)
