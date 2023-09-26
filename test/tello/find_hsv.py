@@ -28,8 +28,7 @@ cam_height = 480
 while True:
     frame_read = tello.get_frame_read()
     myFrame = frame_read.frame
-    img = cv2.resize(myFrame + 30, (cam_width, cam_height))
+    img = cv2.resize(myFrame+30, (cam_width, cam_height))
     cv2.imshow("abc", img)
-    cv2.imshow("abcd", img)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break

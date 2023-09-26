@@ -1,5 +1,7 @@
 from main.module.handler.NumberHandler import NumberHandler
+from main.module.handler.NumberHandlerV2 import NumberHandlerV2
 from main.module.ai_model.NumberModel import NumberModel
+from main.module.ai_model.NumberModelV2 import NumberModelV2
 import torch
 import cv2
 import numpy as np
@@ -34,12 +36,28 @@ def stackImages(scale,imgArray):
         hor= np.hstack(imgArray)
         ver = hor
     return ver
-model = NumberModel()  # 모델 클래스 정의로 변경
-model.load_state_dict(torch.load("../../../main/module/ai_model/cnn_model.pth"))
-model.eval()  # 모델을 평가 모드로 설정
+def load(root, fileName):
+    import os
 
+    state_dict = torch.load(os.path.abspath(os.path.join(root, fileName + '.pth')))
+    model = state_dict['model_state_dict']
+    optimizer = state_dict['optimizer_state_dict']
+
+    return model, optimizer
+
+model = NumberModelV2()  # 모델 클래스 정의로 변경
+
+msd, _ = load('../../../main/module/ai_model/', 'classifier')
+model.load_state_dict(msd)
+model.eval()
+
+# model = NumberModel()  # 모델 클래스 정의로 변경
+# model.load_state_dict(torch.load("../../../main/module/ai_model/cnn_model.pth"))
+# model.eval()  # 모델을 평가 모드로 설정
+#
 # NumberHandler 인스턴스 생성
-number_handler = NumberHandler(model)
+# number_handler = NumberHandler(model)
+number_handler = NumberHandlerV2(model)
 
 # 숫자 이미지 파일
 one_img = cv2.imread("images/1.png")
@@ -96,10 +114,7 @@ result = number_handler.find_all_numbers(hihi, 500)
 for (x, y, w, h), predicted in result:
     cv2.rectangle(hihi, (x, y), (x+w, y+h), (255, 0, 0), 2)
     cv2.putText(hihi, str(predicted), (x + w // 2, y - 20), cv2.FONT_ITALIC, 1, (0, 0, 0),thickness=3)
-# (x, y, w, h), predicted = number_handler.find_biggest_number(hihi, 1000)
-# print(x, y, w, h, predicted)
-# cv2.rectangle(hihi, (x, y), (x+w, y+h), (255, 0, 0), 2)
-# cv2.putText(hihi, str(predicted), (x + w // 2, y - 20), cv2.FONT_ITALIC, 1, (0, 0, 0),thickness=3)
+
 # 여러 숫자 이미지
 stacked_img = stackImages(0.6, ([[one_img, one_img_big, numbers], [one_seven_nine, seven_nine, three_six_nine_only_red]]))
 cv2.imshow("stack", stacked_img)

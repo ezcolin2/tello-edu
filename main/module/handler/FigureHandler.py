@@ -85,7 +85,7 @@ class FigureHandler:
                     x_t, y_t, w_t, h_t = cv2.boundingRect(approx)
 
                     # ring이 아니고 가로세로 비율이 일정 비율 이상일 때만 추가
-                    if not self.is_ring(color, figure, img[y_t: y_t + h_t, x_t: x_t + w_t]) and w_t!=0 and h_t!=0 and min(w_t, h_t)/max(w_t, h_t)>=0.2:
+                    if not self.is_ring(color, figure, img[y_t: y_t + h_t, x_t: x_t + w_t]) and w_t!=0 and h_t!=0 and min(w_t, h_t)/max(w_t, h_t)>=0.3:
                         # if draw_contour:
                         #     cv2.drawContours(img, cnt, -1, (0, 255, 255), 3)
                         figureTypeList.append(objType)
@@ -172,7 +172,7 @@ class FigureHandler:
                     x_t, y_t, w_t, h_t = cv2.boundingRect(approx)
 
                     # ring이rh 가로세로 비율이 일정 비율 이상일 때만 추가
-                    if self.is_ring(color, figure, img[y_t: y_t + h_t, x_t: x_t + w_t]) and w_t!=0 and h_t!=0 and min(w_t, h_t)/max(w_t, h_t)>=0.2:
+                    if self.is_ring(color, figure, img[y_t: y_t + h_t, x_t: x_t + w_t]) and w_t!=0 and h_t!=0:
                         # if draw_contour:
                         #     cv2.drawContours(img, cnt, -1, (0, 255, 255), 3)
                         figureTypeList.append(objType)
@@ -223,7 +223,7 @@ class FigureHandler:
 
         # 빨간색이 감지가 잘 안 돼서 빨간색 감지할 때는 초록, 파랑색을 없앰
         if color == Color.RED_REC:
-            img = self.image_handler.delete_specific_color(img, Color.BLUE)
+            img[:] = self.image_handler.delete_specific_color(img, Color.BLUE)[:]
 
         imgHSV = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
         lower = np.array([myColors[color.value][0:3]])
@@ -268,10 +268,10 @@ class FigureHandler:
 
                     # 삼각형이 짤리면 꼭짓점이 4개가 나와서 사각형을 방지할 수 있음
                     # 이를 방지하기 위해서 x와 y가 0이 아닐 때만 추가
-                    if x!=0 and y!=0:
-                        figureTypeList.append(objType)
-                        figureTypeArea.append((x, y, w, h))
-                        figureCntList.append(cnt)
+                    # if x!=0 and y!=0:
+                    figureTypeList.append(objType)
+                    figureTypeArea.append((x, y, w, h))
+                    figureCntList.append(cnt)
                 # if figure.value == Figure.TRI.value and objType == 3:
                 #     print('tri')
                 # elif count[figure.value][0]<=objType <= count[figure.value][1]:
@@ -378,13 +378,10 @@ class FigureHandler:
         return approx_list
 
     def is_ring(self, color, figure, cropped_img):
-        if self.check_ring_by_area(color, figure, cropped_img):
-            print("area : True")
+        if self.check_ring_by_cnt(color, figure, cropped_img):
             return True
-        elif self.check_ring_by_cnt(color, figure, cropped_img):
-            print("cnt : True")
+        elif self.check_ring_by_area(color, figure, cropped_img):
             return True
-        print("is_ring : false")
         return False
 
     def check_ring_by_cnt(self, color, figure, cropped_img, draw_contours=False):
@@ -408,7 +405,7 @@ class FigureHandler:
         # 자른 이미지에서 모든 contour를 구함.
         cropped_area = cropped_img.shape[0]*cropped_img.shape[1] #
         approx_list = self._get_all_contours(cropped_img, mask, figure, cropped_area*0.3, draw_contours = draw_contours)
-        print(f'개수 : {len(approx_list)}')
+        # print(f'개수 : {len(approx_list)}')
         # 가운데가 비어있다면 우선 바깥 contour와 안쪽 contour 두 개가 감지되어야 함
         if len(approx_list)==2:
             for approx in approx_list:
@@ -433,7 +430,7 @@ class FigureHandler:
         lower = np.array([myColors[color.value][0:3]])
         upper = np.array([myColors[color.value][3:6]])
         mask1 = cv2.inRange(imgHSV, lower, upper)
-        cv2.imshow("maks1", mask1)
+        # cv2.imshow("maks1", mask1)
 
         # mask의 넓이
         big_area = cv2.countNonZero(mask1)
@@ -450,7 +447,6 @@ class FigureHandler:
         imgHSV = cv2.cvtColor(cropped_img, cv2.COLOR_BGR2HSV)
 
         mask2 = cv2.inRange(imgHSV, lower, upper)
-        cv2.imshow("maks2", mask2)
         small_area = cv2.countNonZero(mask2)
         # kernel = np.ones((5, 5), np.uint8)
         # mask = cv2.dilate(mask, kernel, iterations=2)
@@ -464,7 +460,7 @@ class FigureHandler:
         #
         # # 가장 큰 contour의 면적 구함
         # area = self._get_biggest_contour_area(cropped_img, mask, figure, 100, draw_contour=False)
-        print(f'area : {big_area}, small : {small_area}')
+        # print(f'area : {big_area}, small : {small_area}')
         # # 반절 미만을 차지하면 링이라고 판단
         # if cv2.countNonZero(mask) < w*h*0.5:
         #     return True

@@ -12,13 +12,6 @@ from main.module.handler.NumberHandler import NumberHandler
 
 import logging
 from djitellopy import Tello
-def find_flag(tello:Tello, color:Color):
-    """
-    사각형이 아닌 경우 사각형을 찾을 때까지 flag 주위를 돎
-    :param tello: Tello 객체
-    :param color: Color enum 타입
-    :return: 인식한 숫자
-    """
 
 # 로그 설정
 logging.getLogger('djitellopy').setLevel(logging.WARNING)
