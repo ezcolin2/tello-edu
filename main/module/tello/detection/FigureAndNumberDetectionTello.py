@@ -122,7 +122,7 @@ class FigureAndNumberDetectionTello:
                     image_name += "Blue"
 
                 if save:
-                    cv2.imwrite(f"second_result/{image_name}.png", img)
+                    cv2.imwrite(f"images/{image_name}.png", img)
 
                 if console:
                     # 터미널에 front, back 출력
@@ -166,19 +166,10 @@ class FigureAndNumberDetectionTello:
             frame_read = self.tello.get_frame_read()
             my_frame = frame_read.frame
             img = cv2.resize(my_frame+brightness, (cam_width, cam_height))
-            cv2.imshow("asdf", img)
+            cv2.imshow("Video", img)
             contour_info, figureType = self.figure_handler.find_color_except_ring(img, color, Figure.ANY, min_area, draw_contour=True)
             x, y, w, h = contour_info
 
-            try:
-                print('출력')
-                print(cam_width * (0.5 - self.range_params.find_range_percentage) <= x + w // 2 <= cam_width * (0.5 + self.range_params.find_range_percentage))
-                print(cam_height * (0.5 - self.range_params.find_range_percentage) <= y + h // 2 <= cam_height * (0.5 + self.range_params.find_range_percentage))
-                print(figureType)
-                print(w * h > self.range_params.min_area)
-                print(self.figure_handler.is_ring(color, Figure.RECTANGLE, img[y: y + h, x: x + w]))
-            except:
-                pass
 
             # 범위 안에 포함되어 있고 감지를 제대로 했으며 최소 면적을 넘고 사각형 링이 아니라는 것을 감지했다면
             if (
@@ -276,7 +267,7 @@ class FigureAndNumberDetectionTello:
                 cv2.putText(img_result, str(result), (x + w // 2, y - 20), cv2.FONT_ITALIC, 1, (255, 255, 255),
                             thickness=3)
 
-                cv2.imwrite(f'{Color(color.value).name}_number.png', img_result)
+                cv2.imwrite(f'images/{Color(color.value).name}_number.png', img_result)
 
         print('색, 숫자 매칭 완료')
         return result, (x, y, w, h)

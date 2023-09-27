@@ -87,7 +87,7 @@ class RectangleRingDetection:
                     image_name += " circle"
 
                 if save:
-                    cv2.imwrite(f"{image_name}_ring.png", img)
+                    cv2.imwrite(f"images/{image_name}_ring.png", img)
 
                 if console:
                     # 터미널에 front, back 출력
@@ -160,7 +160,7 @@ class RectangleRingDetection:
                     image_name += " circle"
 
                 if save:
-                    cv2.imwrite(f"{image_name}_ring.png", img)
+                    cv2.imwrite(f"images/{image_name}_ring.png", img)
 
                 if console:
                     # 터미널에 front, back 출력
@@ -212,7 +212,7 @@ class RectangleRingDetection:
 
         # 범위 안에 있으면 어디로 회전할지 판단하기
         self.tello.move_right(50)
-        aspect_ratio = self._move_until_find(color, figure, Direction.COUNTERCLOCKWISE, 0.15, brightness=30)
+        aspect_ratio = self._move_until_find(color, figure, Direction.COUNTERCLOCKWISE, 0.1, brightness=30)
         # self.tello.rotate_counter_clockwise(30)
 
         # 우선 회전 해보고 aspect ratio 계산
@@ -255,7 +255,7 @@ class RectangleRingDetection:
                         image_name += "Blue"
 
                     if save:
-                        cv2.imwrite(f"{image_name}_ring.png", img)
+                        cv2.imwrite(f"images/{image_name}_ring.png", img)
                 break
             # q를 누르면 무한 반복에서 빠져나옴
             if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -335,7 +335,7 @@ class RectangleRingDetection:
                     image_name += "Blue"
 
                 if save:
-                    cv2.imwrite(f"{image_name}_ring.png", img)
+                    cv2.imwrite(f"images/{image_name}_ring.png", img)
 
                 if console:
                     # 터미널에 front, back 출력
@@ -436,7 +436,7 @@ class RectangleRingDetection:
             frame_read = self.tello.get_frame_read()
             my_frame = frame_read.frame
             img = cv2.resize(my_frame + brightness, (cam_width, cam_height))
-            cv2.imshow("asdf", img)
+            cv2.imshow("Video", img)
             contour_info, figureType = self.figure_handler.find_color(img, color, figure, min_area)
             x, y, w, h = contour_info
             # 만약 가운데가 비어있는 링이 아닌 사각형이라면
@@ -485,7 +485,7 @@ class RectangleRingDetection:
             frame_read = self.tello.get_frame_read()
             my_frame = frame_read.frame
             img = cv2.resize(my_frame + brightness, (cam_width, cam_height))
-            cv2.imshow("asdf", img)
+            cv2.imshow("Video", img)
             contour_info, figureType = self.figure_handler.find_color(img, color, figure, min_area)
             x, y, w, h = contour_info
             # 만약 가운데가 비어있는 링이 아닌 사각형이라면
@@ -496,8 +496,8 @@ class RectangleRingDetection:
             if (
                     cam_width * (0.5 - find_range_percentage) <= x + w // 2 <= cam_width * (
                     0.5)
-                    and cam_height * (0.5 - find_range_percentage) <= y + h // 2 <= cam_height * (
-                    0.5 + find_range_percentage)
+                    and cam_height * (0.5 - find_range_percentage*3) <= y + h // 2 <= cam_height * (
+                    0.5 + find_range_percentage*3)
                     and figureType >= 0
                     and w * h > self.range_params.min_area
             ):
@@ -593,7 +593,7 @@ class RectangleRingDetection:
                 cv2.putText(img_result, str(result), (x + w // 2, y - 20), cv2.FONT_ITALIC, 1, (255, 255, 255),
                             thickness=3)
 
-                cv2.imwrite(f'{Color(color.value).name}_ring_number.png', img_result)
+                cv2.imwrite(f'images/{Color(color.value).name}_ring_number.png', img_result)
 
         print('색, 숫자 매칭 완료')
         return result, (x, y, w, h)
@@ -663,7 +663,7 @@ class RectangleRingDetection:
                     image_name += "Blue"
 
                 if save:
-                    cv2.imwrite(f"{image_name}_ring.png", img)
+                    cv2.imwrite(f"images/{image_name}_ring.png", img)
 
                 if console:
                     # 터미널에 front, back 출력

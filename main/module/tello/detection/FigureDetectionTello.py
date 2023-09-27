@@ -97,7 +97,7 @@ class FigureDetectionTello:
             frame_read = self.tello.get_frame_read()
             my_frame = frame_read.frame
             img = cv2.resize(my_frame+brightness, (cam_width, cam_height))
-            cv2.imshow("asdf", img)
+            cv2.imshow("Video", img)
             contour_info, figureType = self.figure_handler.find_color(img, color, figure, 500)
             x, y, w, h = contour_info
             if (

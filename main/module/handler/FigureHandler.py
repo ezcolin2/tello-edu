@@ -119,6 +119,7 @@ class FigureHandler:
             stacked_image = self.image_handler.stackImages(0.6, [img, mask])
             if show:
                 cv2.imshow("image adn mask", stacked_image)
+                cv2.imshow("Video", img)
 
         return (x, y, w, h), figure_type
     def find_color_with_ring(self, img, color, figure, min_area, draw_contour=False, show=False):
@@ -205,7 +206,7 @@ class FigureHandler:
             cv2.drawContours(img, figureCntList[max_idx], -1, (0, 255, 255), 3)
             stacked_image = self.image_handler.stackImages(0.6, [img, mask])
             if show:
-                cv2.imshow("Video", stacked_image)
+                cv2.imshow("Video", img)
 
         return (x, y, w, h), figure_type
 
@@ -300,7 +301,7 @@ class FigureHandler:
 
             stacked_image = self.image_handler.stackImages(0.6, [img, mask])
             if show:
-                cv2.imshow("image adn mask", img)
+                cv2.imshow("Video", img)
 
         return (x, y, w, h), figure_type
 
@@ -373,7 +374,7 @@ class FigureHandler:
                 # contour 그리기
                 stacked_image = self.image_handler.stackImages(0.6, [img, mask])
                 if show:
-                    cv2.imshow("image adn mask", img)
+                    cv2.imshow("Video", img)
         return approx_list
 
     def is_ring(self, color, figure, cropped_img):

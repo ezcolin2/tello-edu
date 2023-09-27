@@ -117,7 +117,6 @@ class TrackingTello:
         :return : 객체 중간 여부, error_lr, error_ud, error_fb
         """
         # pid 적용
-        print(f'is_aspect : {p_is_aspect}, aspect_ratio = {p_aspect_ratio}')
         x, y, w, h = contour_info
 
         p_lr, i_lr, d_lr = self.pid_params.pid_value_lr
@@ -175,7 +174,6 @@ class TrackingTello:
         # is_aspect가 False면 회전 방향 변경
         if not is_aspect:
             print('놓침')
-            print(x, y, w, h)
             speed_lr = -speed_lr
         elif x==0 and y==0 and w==0 and h==0:
             speed_lr = -speed_lr
@@ -210,7 +208,6 @@ class TrackingTello:
         :return : 객체 중간 여부, error_lr, error_ud, error_fb,
         """
         # pid 적용
-        print(f'is_aspect : {p_is_aspect}, aspect_ratio = {p_aspect_ratio}')
         x, y, w, h = contour_info
 
         p_lr, i_lr, d_lr = self.pid_params.pid_value_lr
@@ -268,7 +265,6 @@ class TrackingTello:
         # is_aspect가 False면 회전 방향 변경
         if not is_aspect:
             print('놓침')
-            print(x, y, w, h)
             speed_lr = -speed_lr
         elif x==0 and y==0 and w==0 and h==0:
             speed_lr = -speed_lr
@@ -353,7 +349,7 @@ class TrackingTello:
         if (
                 self.range_params.fb_range[0] <= w * h <= self.range_params.fb_range[1]
                 and cam_width * (0.5 - self.range_params.center_range_percentage) <= x + w // 2 <= cam_width * (0.5 + self.range_params.center_range_percentage)
-                and cam_height * (0.5 - self.range_params.center_range_percentage*3) <= y + h // 2 <= cam_height * (0.5 + self.range_params.center_range_percentage*3)
+                and cam_height * (0.5 - self.range_params.center_range_percentage*1.5) <= y + h // 2 <= cam_height * (0.5 + self.range_params.center_range_percentage*1.5)
         ):
             # if speed==0:
             return True, error_lr, error_ud, error_fb
@@ -480,10 +476,7 @@ class TrackingTello:
         speed_fb = p_fb * error_fb + i_fb * (error_fb - p_error_fb)
         speed_fb = int(np.clip(speed_fb, -100, 100))
 
-
-
-
-            # fb = 0
+        # fb = 0
             # 이미지의 width, height가 다르기 때문에 center_range_percentage를 조정함
         if (
                 self.range_params.fb_range[0] <= area <= self.range_params.fb_range[1]
@@ -491,9 +484,6 @@ class TrackingTello:
                 and cam_height * (0.5 - self.range_params.center_range_percentage*3) <= y + h // 2 <= cam_height * (0.5 + self.range_params.center_range_percentage*3)
         ):
             # if speed==0:
-            print(area)
-            print(x+w//2)
-            print(y+h//2)
             return True, error_lr, error_ud, error_fb
 
         # 벗어나면 멈춤

@@ -42,35 +42,23 @@ number_model.eval()
 
 number_handler = NumberHandlerV2(number_model)
 
-# yolo_model = YOLO("best.pt", task ="segment")
-# yolo_model = yolo_model.to('cpu')
-
-
-# img+=30
-# n=number_handler.find_number_with_color_rectangle(img, Color.GREEN, save=True, rectangle_contour=True)
-# print(n)
-#
+# zone 1 도형 탐색 객체
 cam_width = 640
 cam_height = 480
 cam_params = CamParams(cam_width, cam_height)
 pid_params = PIDParams([0.08, 0.08, 0], [0.2, 0.2, 0], [0.0003, 0.0003, 0])
 range_params = RangeParams([20000, 60000], [0.45 * cam_params.width, 0.55 * cam_params.height], 1000, 0.1, 0.1, 0.4)
+figure_detection = FigureAndNumberDetectionTello(tello, cam_params, pid_params, range_params, number_handler)
 
-# pid_params_2 = PIDParams([0.13, 0.13, 0], [0.13, 0.13, 0], [0.0003, 0.0003, 0])
-# range_params_2 = RangeParams([50000, 80000], [0.45 * cam_params.width, 0.55 * cam_params.height], 1000, 0.05, 0.1, 0.3)
-# rectangle_ring_detection = RectangleRingDetection(tello, cam_params, pid_params_2, range_params_2, number_handler)
-#
-# pid_params_3 = PIDParams([0.13, 0.13, 0], [0.13, 0.13, 0], [0.0003, 0.0003, 0])
-# range_params_3 = RangeParams([20000, 40000], [0.45 * cam_params.width, 0.55 * cam_params.height], 1000, 0.1, 0.1, 0.3)
-# rectangle_ring_rotate_detection = RectangleRingDetection(tello, cam_params, pid_params_3, range_params_3, number_handler)
+# zone 2 링 탐색 객체
 pid_params_2 = PIDParams([0.1, 0.1, 0], [0.13, 0.13, 0], [0.0005, 0.0005, 0])
-range_params_2 = RangeParams([10000, 40000], [0.45 * cam_params.width, 0.55 * cam_params.height], 3000, 0.03, 1.0, 0.35)
+range_params_2 = RangeParams([10000, 40000], [0.45 * cam_params.width, 0.55 * cam_params.height], 3000, 0.1, 1.0, 0.35)
 rectangle_ring_detection = RectangleRingDetection(tello, cam_params, pid_params_2, range_params_2, number_handler)
 
+# zone 2 링 회전 및 통과 객체
 pid_params_3 = PIDParams([0.1, 0.1, 0], [0.1, 0.1, 0], [0.0003, 0.0003, 0])
 range_params_3 = RangeParams([80000, 120000], [0.45 * cam_params.width, 0.55 * cam_params.height], 3000, 0.05, 0.05, 0.3)
 rectangle_ring_rotate_detection = RectangleRingDetection(tello, cam_params, pid_params_3, range_params_3, number_handler)
-figure_detection = FigureAndNumberDetectionTello(tello, cam_params, pid_params, range_params, number_handler)
 
 number_detection = NumberDetectionTello(tello, cam_params, pid_params, range_params, number_model)
 # def get_cls_idx(img, idx_list):
@@ -109,7 +97,7 @@ def first(right, forward, color):
         contour_info, figure_type, = figure_detection.figure_handler.find_color_except_ring(img, color, Figure.ANY, range_params.min_area, draw_contour=True, show=True)
         print(f'figure type : {figure_type}')
         if figure_type==4:
-            cv2.imwrite(f'{Color(color.value).name}_rectangle.png', img)
+            cv2.imwrite(f'images/{Color(color.value).name}_rectangle.png', img)
             break
         elif figure_type==3:
             tello.move_up(40)
