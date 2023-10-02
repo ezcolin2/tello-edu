@@ -214,7 +214,7 @@ class RectangleRingDetection:
         self.tello.move_right(50)
         aspect_ratio = self._move_until_find(color, figure, Direction.COUNTERCLOCKWISE, 0.1, brightness=30)
         # self.tello.rotate_counter_clockwise(30)
-
+        print('중심 맞추기 시작')
         # 우선 회전 해보고 aspect ratio 계산
         # frame_read = self.tello.get_frame_read()
         # my_frame = frame_read.frame

@@ -181,10 +181,10 @@ def second(next):
     # 바로 앞에 있는 것이 찾는 숫자가 아닐 때
     if next != find_num:
         # 다른 애 찾기
-        if b_x < r_x:
-            tello.move_right(40)
-        else:
-            tello.move_left(40)
+        # if b_x < r_x:
+        #     tello.move_right(40)
+        # else:
+        #     tello.move_left(40)
         rectangle_ring_detection.move_until_find(Color.BLUE, Figure.ANY, Direction.COUNTERCLOCKWISE, brightness=30)
 
         # 정면 보도록 회전
@@ -237,10 +237,10 @@ def second(next):
 
 
         # 다른 애 찾기
-        if b_x < r_x:
-            tello.move_left(40)
-        else:
-            tello.move_right(40)
+        # if b_x < r_x:
+        #     tello.move_left(40)
+        # else:
+        #     tello.move_right(40)
         rectangle_ring_detection.move_until_find(Color.BLUE, Figure.ANY, Direction.COUNTERCLOCKWISE, brightness=30)
 
         # 정면 보도록 회전

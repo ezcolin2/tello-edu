@@ -29,7 +29,7 @@ class FigureHandler:
         mask = cv2.inRange(imgHSV, lower, upper)
         kernel = np.ones((5, 5), np.uint8)
         mask = cv2.dilate(mask, kernel, iterations=3)
-        cv2.imshow("maks", mask)
+        # cv2.imshow("maks", mask)
         contour_info, objType = self._get_biggest_contour(img, mask, figure, min_area, draw_contour=draw_contour, show=True)
 
         return contour_info, objType
@@ -118,7 +118,7 @@ class FigureHandler:
             cv2.drawContours(img, figureCntList[max_idx], -1, (0, 255, 255), 3)
             stacked_image = self.image_handler.stackImages(0.6, [img, mask])
             if show:
-                cv2.imshow("image adn mask", stacked_image)
+                # cv2.imshow("image adn mask", stacked_image)
                 cv2.imshow("Video", img)
 
         return (x, y, w, h), figure_type
@@ -466,6 +466,7 @@ class FigureHandler:
         #     return True
         # else:
         #     return False
+        print(big_area, small_area)
         if small_area<big_area*0.2:
             return True
         return False

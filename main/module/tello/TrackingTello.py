@@ -481,7 +481,7 @@ class TrackingTello:
         if (
                 self.range_params.fb_range[0] <= area <= self.range_params.fb_range[1]
                 and cam_width * (0.5 - self.range_params.center_range_percentage) <= x + w // 2 <= cam_width * (0.5 + self.range_params.center_range_percentage)
-                and cam_height * (0.5 - self.range_params.center_range_percentage*3) <= y + h // 2 <= cam_height * (0.5 + self.range_params.center_range_percentage*3)
+                and cam_height * (0.5 - self.range_params.center_range_percentage*2) <= y + h // 2 <= cam_height * (0.5 + self.range_params.center_range_percentage*2)
         ):
             # if speed==0:
             return True, error_lr, error_ud, error_fb

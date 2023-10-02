@@ -66,29 +66,29 @@ tello.streamon()
 tello.send_rc_control(0, 0, 0, 0)
 tello.takeoff()
 print('이륙')
-# tello.move_up(50)
+tello.move_up(40)
 print('상승 완료')
 time.sleep(2)
 
 # 첫 번째 색 찾을 때까지 회전
-rectangle_ring_detection.move_until_find(Color.RED_REC, Figure.ANY, Direction.COUNTERCLOCKWISE, brightness=30)
+rectangle_ring_detection.move_until_find(Color.BLUE, Figure.ANY, Direction.COUNTERCLOCKWISE, brightness=30)
 
 # 회전하면서 정면을 봄
-p_aspect_ratio = rectangle_ring_detection.tello_detection_square_ring_with_no_rotate(Color.RED_REC, Figure.ANY,
+p_aspect_ratio = rectangle_ring_detection.tello_detection_square_ring_with_no_rotate(Color.BLUE, Figure.ANY,
                                                                                      brightness=30)
-rectangle_ring_rotate_detection.tello_detection_rectangle_ring_with_rotate_v3(Color.RED_REC, Figure.RECTANGLE,
+rectangle_ring_rotate_detection.tello_detection_rectangle_ring_with_rotate_v3(Color.BLUE, Figure.RECTANGLE,
                                                                               p_aspect_ratio, brightness=30,
                                                                               save=False, console=False)
-rectangle_ring_rotate_detection.tello_detection_rectangle_ring_with_no_rotate(Color.RED_REC, Figure.ANY,
+rectangle_ring_rotate_detection.tello_detection_rectangle_ring_with_no_rotate(Color.BLUE, Figure.ANY,
                                                                               brightness=30,
                                                                               save=True)
 # 링 통과
-tello.move_down(35)
-tello.move_forward(220)
-tello.move_up(35)
-tello.rotate_clockwise(180)
-tello.land()
-
+# tello.move_down(35)
+# tello.move_forward(220)
+# tello.move_up(35)
+# tello.rotate_clockwise(180)
+# tello.land()
+#
 
 # 정면 보면 숫자 판단
 # frame_read = tello.get_frame_read()

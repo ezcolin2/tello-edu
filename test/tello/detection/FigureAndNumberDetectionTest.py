@@ -29,7 +29,10 @@ number_handler = NumberHandler(model)
 figure_detection = FigureAndNumberDetectionTello(None, cam_params, pid_params, range_params, number_handler)
 
 
-cv2.waitKey()
+one_img = cv2.imread("./images/12345.png")
+figure_detection.find_number_and_contour_info_with_color(one_img, Color.BLUE, save=True)
 # (x, y, w, h), predicted = number_handler.find_biggest_number(one_img, 500)
 # cv2.rectangle(one_img, (x, y), (x+w, y+h), (255, 0, 0), 2)
 # cv2.putText(one_img, str(predicted), (x + w // 2, y - 20), cv2.FONT_ITALIC, 1, (0, 0, 0),thickness=3)
+# cv2.imshow("img", one_img)
+# cv2.waitKey()

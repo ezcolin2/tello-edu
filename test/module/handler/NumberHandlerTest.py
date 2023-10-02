@@ -45,19 +45,19 @@ def load(root, fileName):
 
     return model, optimizer
 
-model = NumberModelV2()  # 모델 클래스 정의로 변경
-
-msd, _ = load('../../../main/module/ai_model/', 'classifier')
-model.load_state_dict(msd)
-model.eval()
-
-# model = NumberModel()  # 모델 클래스 정의로 변경
-# model.load_state_dict(torch.load("../../../main/module/ai_model/cnn_model.pth"))
-# model.eval()  # 모델을 평가 모드로 설정
+# model = NumberModelV2()  # 모델 클래스 정의로 변경
 #
+# msd, _ = load('../../../main/module/ai_model/', 'classifier')
+# model.load_state_dict(msd)
+# model.eval()
+# number_handler = NumberHandlerV2(model)
+
+model = NumberModel()  # 모델 클래스 정의로 변경
+model.load_state_dict(torch.load("../../../main/module/ai_model/cnn_model.pth"))
+model.eval()  # 모델을 평가 모드로 설정
+
 # NumberHandler 인스턴스 생성
-# number_handler = NumberHandler(model)
-number_handler = NumberHandlerV2(model)
+number_handler = NumberHandler(model)
 
 # 숫자 이미지 파일
 one_img = cv2.imread("images/1.png")
@@ -119,4 +119,35 @@ for (x, y, w, h), predicted in result:
 stacked_img = stackImages(0.6, ([[one_img, one_img_big, numbers], [one_seven_nine, seven_nine, three_six_nine_only_red]]))
 cv2.imshow("stack", stacked_img)
 cv2.imshow("small", hihi)
+
+# 작은 숫자 이미지
+hihi2 = cv2.imread("images/09-27-number-7.png")
+result = number_handler.find_all_numbers(hihi2, 500)
+for (x, y, w, h), predicted in result:
+    cv2.rectangle(hihi2, (x, y), (x+w, y+h), (255, 0, 0), 2)
+    cv2.putText(hihi2, str(predicted), (x + w // 2, y - 20), cv2.FONT_ITALIC, 1, (0, 0, 0),thickness=3)
+
+cv2.imshow("small2", hihi2)
+
+# 작은 숫자 이미지
+hihi3 = cv2.imread("images/09-27-2.png")
+result = number_handler.find_all_numbers(hihi3, 500)
+for (x, y, w, h), predicted in result:
+    cv2.rectangle(hihi3, (x, y), (x+w, y+h), (255, 0, 0), 2)
+    cv2.putText(hihi3, str(predicted), (x + w // 2, y - 20), cv2.FONT_ITALIC, 1, (0, 0, 0),thickness=3)
+
+cv2.imshow("small3", hihi3)
+
+# # 숫자 이미지 파일
+# hihi4= cv2.imread("images/09-27-number-7.png")
+# (x, y, w, h), predicted = number_handler.find_biggest_number(hihi4, 500)
+# cv2.rectangle(hihi4, (x, y), (x+w, y+h), (255, 0, 0), 2)
+# cv2.putText(hihi4, str(predicted), (x + w // 2, y - 20), cv2.FONT_ITALIC, 1, (0, 0, 0),thickness=3)
+# cv2.imshow("small4", hihi4)
+# # 숫자 이미지 파일
+# hihi5= cv2.imread("images/09-27-2.png")
+# (x, y, w, h), predicted = number_handler.find_biggest_number(hihi5, 500)
+# cv2.rectangle(hihi5, (x, y), (x+w, y+h), (255, 0, 0), 2)
+# cv2.putText(hihi5, str(predicted), (x + w // 2, y - 20), cv2.FONT_ITALIC, 1, (0, 0, 0),thickness=3)
+# cv2.imshow("small5", hihi5)
 cv2.waitKey()

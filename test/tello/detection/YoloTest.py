@@ -26,7 +26,7 @@ tello = Tello()
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 yolo_model = YOLO("yolo.pt", task = "segment")
-yolo_model = yolo_model.to('cuda')
+yolo_model = yolo_model.to(device)
 yolo_handler = YoloHandler(yolo_model)
 # 연결
 tello.connect()
