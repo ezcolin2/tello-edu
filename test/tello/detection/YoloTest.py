@@ -19,13 +19,13 @@ import logging
 from djitellopy import Tello
 from ultralytics import YOLO
 # 로그 설정
-logging.getLogger('djitellopy').setLevel(logging.WARNING)
+logging.getLogger('djitellopy').setLevel(logging.ERROR)
 
 tello = Tello()
 
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
-yolo_model = YOLO("yolo.pt", task = "segment")
+yolo_model = YOLO("best.pt", task = "segment")
 yolo_model = yolo_model.to(device)
 yolo_handler = YoloHandler(yolo_model)
 # 연결

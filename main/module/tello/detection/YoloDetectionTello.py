@@ -54,7 +54,7 @@ class YoloDetectionTello:
             img = cv2.resize(my_frame + brightness, (cam_width, cam_height))
             # 모든 contour를 찾고나면 이 중에서 rectangle ring을 걸러내야하기 때문에 contour를 그리지는 않는다.
             contour_info = self.yolo_handler.get_object_xyxy(img, draw_rectangle=True)
-
+            cv2.imshow("Video", img)
             x, y, w, h = contour_info
 
             # 너무 가까이 가면 contour를 감지 못 하기 때문에 뒤로 이동
@@ -66,7 +66,7 @@ class YoloDetectionTello:
 
             # 가운데로 왔고 저장을 하고 싶다면 이미지 저장
             if success and save:
-                cv2.imwrite(f"plane.png", img)
+                cv2.imwrite(f"images/yolo.png", img)
                 break
             # q를 누르면 무한 반복에서 빠져나옴
             elif success:
@@ -102,7 +102,7 @@ class YoloDetectionTello:
 
             if (
                     cam_width * (0.5 - self.range_params.find_range_percentage) <= x + w // 2 <= cam_width * (
-                    0.5)
+                    0.5 + self.range_params.find_range_percentage)
                     and cam_height * (0.5 - self.range_params.find_range_percentage) <= y + h // 2 <= cam_height * (
                     0.5 + self.range_params.find_range_percentage)
                     and w * h > self.range_params.min_area

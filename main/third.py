@@ -50,8 +50,8 @@ number_handler = NumberHandler(model)
 
 # yolo 모델 생성
 device = "cuda" if torch.cuda.is_available() else "cpu"
-yolo_model = YOLO("./module/ai_model/yolo.pt", task = "segment")
-yolo_model = yolo_model.to('cpu')
+yolo_model = YOLO("./module/ai_model/best.pt", task = "segment")
+yolo_model = yolo_model.to(device)
 yolo_handler = YoloHandler(yolo_model)
 
 # zone 1 도형 탐색 객체
@@ -71,11 +71,15 @@ rectangle_ring_detection = RectangleRingDetection(tello, cam_params, pid_params_
 pid_params_3 = PIDParams([0.1, 0.1, 0], [0.1, 0.1, 0], [0.0003, 0.0003, 0])
 range_params_3 = RangeParams([80000, 120000], [0.45 * cam_params.width, 0.55 * cam_params.height], 3000, 0.05, 0.05,
                              0.4)
+# zone 3 기체 감ㅈ 객체
+pid_params_3 = PIDParams([0.07, 0.07, 0], [0.07, 0.07, 0], [0.0002, 0.0002, 0])
+range_params_3 = RangeParams([120000, 150000], [0.45 * cam_params.width, 0.55 * cam_params.height], 3000, 0.05, 0.05,
+                             0.4)
 rectangle_ring_rotate_detection = RectangleRingDetection(tello, cam_params, pid_params_3, range_params_3,
                                                          number_handler)
 
 # zone 3 기체 탐지 객체
-yolo_detection = YoloDetectionTello(tello, cam_params, pid_params, range_params, yolo_handler)
+yolo_detection = YoloDetectionTello(tello, cam_params, pid_params_3, range_params_3, yolo_handler)
 
 
 def first(right, forward, color):
@@ -264,7 +268,7 @@ def third(direction:Direction):
     yolo_detection.move_until_find(direction, brightness=30, save=True)
 
     # 중심
-    yolo_detection.tello_detection_yolo_with_no_rotate(brightness=30, save=False)
+    yolo_detection.tello_detection_yolo_with_no_rotate(brightness=30, save=True)
 
 
 
@@ -308,13 +312,14 @@ tello.takeoff()
 print('이륙')
 tello.move_up(80)
 print('상승 완료')
-tello.rotate_clockwise(170)
+tello.rotate_counter_clockwise(170)
 # 파란 링, 빨간 링 위치 파악
 time.sleep(2)
 r_x, b_x = get_ring_location()
 print(r_x, b_x)
 tello.move_down(30)
-tello.rotate_clockwise(10)
+tello.rotate_counter_clockwise(10)
+tello.rotate_clockwise(90)
 
 first_number = first(90, 90, Color.BLUE)
 second_number = first(90, 90, Color.GREEN)
@@ -336,19 +341,5 @@ second(next_number)
 direction = Direction.RIGHT if b_x < r_x else Direction.LEFT
 third(direction)
 
-# tello.move_up(60)
-# tello.move_forward(100)
-# # second(Color.BLUE)
-#
-# rectangle_ring_detection.move_until_find(Color.RED_REC, Figure.ANY, Direction.COUNTERCLOCKWISE, brightness=30)
-# rectangle_ring_rotate_detection.tello_detection_rectangle_ring_with_rotate_v2(Color.RED_REC, Figure.RECTANGLE, brightness=30, save=False, console=False)
-# print('중심 맞춤')
-#
-# # 중심 맞추고 사진 저장
-# rectangle_ring_detection.tello_detection_rectangle_ring_with_no_rotate(Color.RED_REC, Figure.ANY, brightness=30, save=True)
-#
-# # 링 통과
-# tello.move_down(40)
-# tello.move_forward(240)
 tello.land()
 

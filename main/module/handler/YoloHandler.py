@@ -20,6 +20,6 @@ class YoloHandler:
         res = list(map(int, res[0]))
         x1, y1, x2, y2 = res
         if draw_rectangle:
-            cv2.rectangle(img, (x1, y1), (x2, y2), (0, 0, 255), 2)
-            cv2.putText(img, str(name), ((x1+x2)//2, y1-20), cv2.FONT_ITALIC, 1.5, (0, 0, 255), 2)
+            cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
+            cv2.putText(img, str(name), ((x1+x2)//2, y1+30), cv2.FONT_ITALIC, 1.0, (0, 255, ), 2)
         return res

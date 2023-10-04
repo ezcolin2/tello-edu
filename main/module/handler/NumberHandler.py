@@ -126,7 +126,7 @@ class NumberHandler:
         img = self.delete_color(img)
         # cv2.imshow("delete", img)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        thr, mask = cv2.threshold(img, 110, 255, cv2.THRESH_BINARY_INV)
+        thr, mask = cv2.threshold(img, 100, 255, cv2.THRESH_BINARY_INV)
         mask = cv2.dilate(mask, kernel, iterations=1)
         bounding_list = self._get_all_number_contours(img, mask, min_area)
 
