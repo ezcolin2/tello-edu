@@ -141,7 +141,7 @@ def first(right, forward, color):
     return predicted
 
 
-def second(next):
+def second(next1, next2):
     # 첫 번째 색 찾을 때까지 회전
     rectangle_ring_detection.move_until_find(Color.RED_REC, Figure.ANY, Direction.COUNTERCLOCKWISE, brightness=30)
 
@@ -183,7 +183,7 @@ def second(next):
     print(f'blue number : {find_num}')
     tello.move_up(30)
     # 바로 앞에 있는 것이 찾는 숫자가 아닐 때
-    if next != find_num:
+    if next_number_1 != find_num and next_number_2 != find_num:
         # 다른 애 찾기
         # if b_x < r_x:
         #     tello.move_right(40)
@@ -331,11 +331,13 @@ tello.move_down(20)
 # 숫자 정렬
 num_list = [first_number, second_number, third_number]
 num_list.sort()
-next_number = third_number + third_number - second_number
-next_number = next_number%10
+next_number_1 = num_list[2] + num_list[2] - num_list[1]
+next_number_1 = next_number_1%10
+next_number_2 = num_list[0] - (num_list[1]-num_list[0])
+next_number_2 = next_number_2%10
 
 # zone 2
-second(next_number)
+second(next_number_1, next_number_2)
 
 # zone 3
 direction = Direction.RIGHT if b_x < r_x else Direction.LEFT

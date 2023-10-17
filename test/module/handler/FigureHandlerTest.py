@@ -257,5 +257,14 @@ cv2.rectangle(img13, (x, y), (x+w, y+h), (0, 255, 255), thickness=2)
 cv2.putText(img13, str(is_ring), (x, y+20), cv2.FONT_ITALIC, 0.6, (0, 255, 255), 2)
 cv2.imshow("img 13", img13)
 
+img14 = cv2.imread("images/hih.png")
+img14 = cv2.resize(img14, (640, 480))
+contour_info ,object_type = figure_handler.find_color_except_ring(img14, Color.BLUE, Figure.ANY, 500)
+x, y, w, h = contour_info
+print(contour_info)
+cv2.rectangle(img14, (x, y), (x+w, y+h), (0, 255, 255), thickness=2)
+cv2.putText(img14, str(w*h), (x, y+20), cv2.FONT_ITALIC, 0.6, (0, 255, 255), 2)
+cv2.imshow("img 14", img14)
+
 
 cv2.waitKey()

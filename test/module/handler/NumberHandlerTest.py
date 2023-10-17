@@ -138,6 +138,33 @@ for (x, y, w, h), predicted in result:
 
 cv2.imshow("small3", hihi3)
 
+# 작은 숫자 이미지
+hihi4 = cv2.imread("images/blue-2.png")
+result = number_handler.find_all_numbers(hihi4, 500)
+for (x, y, w, h), predicted in result:
+    cv2.rectangle(hihi4, (x, y), (x+w, y+h), (255, 0, 0), 2)
+    cv2.putText(hihi4, str(predicted), (x + w // 2, y - 20), cv2.FONT_ITALIC, 1, (0, 0, 0),thickness=3)
+
+cv2.imshow("small4", hihi4)
+
+# 작은 숫자 이미지
+hihi5 = cv2.imread("images/red-8.png")
+result = number_handler.find_all_numbers(hihi5, 500)
+for (x, y, w, h), predicted in result:
+    cv2.rectangle(hihi5, (x, y), (x+w, y+h), (255, 0, 0), 2)
+    cv2.putText(hihi5, str(predicted), (x + w // 2, y - 20), cv2.FONT_ITALIC, 1, (0, 0, 0),thickness=3)
+
+cv2.imshow("small5", hihi5)
+
+# 작은 숫자 이미지
+hihi6 = cv2.imread("images/green-52.png")
+result = number_handler.find_all_numbers(hihi6, 500)
+for (x, y, w, h), predicted in result:
+    cv2.rectangle(hihi6, (x, y), (x+w, y+h), (255, 0, 0), 2)
+    cv2.putText(hihi6, str(predicted), (x + w // 2, y - 20), cv2.FONT_ITALIC, 1, (0, 0, 0),thickness=3)
+
+cv2.imshow("small6", hihi6)
+
 # # 숫자 이미지 파일
 # hihi4= cv2.imread("images/09-27-number-7.png")
 # (x, y, w, h), predicted = number_handler.find_biggest_number(hihi4, 500)
